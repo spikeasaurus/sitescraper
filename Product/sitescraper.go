@@ -12,7 +12,7 @@ import (
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	var d struct {
-		URL             string `json:"url"`
+		Uri             string `json:"uri"`
 		RecursionDepth  string `json:"recursiondepth"`
 		MinimumFileSize string `json:"minfilesize"`
 	}
@@ -29,6 +29,20 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Fprint(w, "Url: "+d.URL+"\nRecursion Depth: "+d.RecursionDepth+"\nMinimum File Size: "+d.MinimumFileSize)
+	d.Uri = "asdf"
+	ParseUri(d.Uri)
+
+	// test output
+	fmt.Fprint(w, "Url: "+d.Uri+"\nRecursion Depth: "+d.RecursionDepth+"\nMinimum File Size: "+d.MinimumFileSize)
+
+}
+
+// ParseUri ...
+func ParseUri(urlString string) {
+
+}
+
+// ReadUri ...
+func ReadUri(urlString string) {
 
 }
