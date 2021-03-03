@@ -13,7 +13,7 @@ import (
 // Sitescraper ...
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Fprint(w, "Hi. I am your Google Assitant. Say Help for a list of things I can do.")
+	//	fmt.Fprint(w, "Hi. I am your Google Assitant. Say Help for a list of things I can do.")
 
 	var d struct {
 		Message string `json:"message"`
