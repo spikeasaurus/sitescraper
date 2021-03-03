@@ -38,7 +38,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		"Restarting to install firmware"}
 
 	if d.Message != "" {
-		fmt.Fprint(w, phrases[rand.Intn(4)])
+		fmt.Fprint(w, phrases[rand.Intn(3)])
 		return
 	}
 
