@@ -7,4 +7,5 @@ func Sitescraper() {
 	i := 1
 	i++
 	fmt.Println("i = ", i)
+	//wut happens
 }
