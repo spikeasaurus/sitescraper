@@ -1,8 +1,8 @@
-package main
+package Sitescraper
 
 import "fmt"
 
-func main() {
+func Sitescraper() {
 	i := 1
 	i++
 	fmt.Println("i = ", i)
