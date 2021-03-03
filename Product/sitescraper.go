@@ -4,20 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
+	"strconv"
 )
 
 // Sitescraper ...
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
-	var d struct {
-		Uri             string `json:"uri"`
-		RecursionDepth  string `json:"recursiondepth"`
-		MinimumFileSize string `json:"minfilesize"`
-	}
+	j := job{}
 
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&j); err != nil {
 		switch err {
 		case io.EOF:
 			fmt.Fprint(w, "EOF")
@@ -29,20 +28,66 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	d.Uri = "asdf"
-	ParseUri(d.Uri)
-
 	// test output
-	fmt.Fprint(w, "Url: "+d.Uri+"\nRecursion Depth: "+d.RecursionDepth+"\nMinimum File Size: "+d.MinimumFileSize)
+	fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize)
 
+	// main loop
+	j.Scrape(&w)
 }
 
-// ParseUri ...
-func ParseUri(urlString string) {
-
+type job struct {
+	Uri             string `json:"uri"`
+	Extension       string `json:"ext"`
+	RecursionDepth  string `json:"recursiondepth"`
+	MinimumFileSize string `json:"minfilesize"`
 }
 
-// ReadUri ...
-func ReadUri(urlString string) {
+// Scrape ...
+func (j job) Scrape(w *http.ResponseWriter) {
 
+	// Issues GET to uri.
+	resp, err := http.Get(j.Uri)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	// Read the html contents
+	html, err := ioutil.ReadAll(resp.Body)
+
+	// Define what Url might look like
+	const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
+	acceptableImageTypes := "jpe?g|png|gif|bmp"
+	acceptableURLTypes := "html?"
+	fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
+	regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
+
+	// Use htmlSource from which to search
+	htmlStr := bytesToString(html)
+	urls := regex.FindAllString(htmlStr, -1)
+
+	// Visit every uri
+	for i, z := range urls {
+		fmt.Fprint(*w, "i,z="+strconv.Itoa(i)+" , "+z)
+	}
+
+	// Visit every url found and pull pix, "1 level deep"
+	for i, z := range urls {
+		//	fmt.Println(i, z)
+
+		if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
+			fmt.Println(i, " Saving "+z)
+			//	downloadFile(path+"/"+i+"jpg", z)
+		} else {
+			fmt.Println(i, "Visiting "+z)
+			//	savePictures(z)
+		}
+		//downloadFile(path, z)
+
+		// For each link, attempt to open
+	}
+}
+
+func bytesToString(data []byte) string {
+	return string(data[:])
 }
