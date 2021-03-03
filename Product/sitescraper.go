@@ -32,7 +32,8 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize)
 
 	// main loop
-	j.Scrape(&w)
+	d := j.RecursionDepthInt()
+	j.Scrape(&w, &d)
 }
 
 type job struct {
@@ -40,6 +41,12 @@ type job struct {
 	Extension       string `json:"ext"`
 	RecursionDepth  string `json:"recursiondepth"`
 	MinimumFileSize string `json:"minfilesize"`
+}
+
+func (j job) RecursionDepthInt() (r int) {
+	r, _ = strconv.Atoi(j.RecursionDepth)
+	return r
+	/// To do: error checking
 }
 
 // Scrape ...
@@ -73,7 +80,7 @@ func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
 		// i -- numbers every uri
 		for i, u := range urls {
 			// Print current value of remainingDepth:
-			fmt.Fprint(*w, "Remaining Depth: " + strconv.Itoa(remainingDepth))
+			fmt.Fprint(*w, "i = "+strconv.Itoa(i)+"\tRemaining Depth: "+strconv.Itoa(*remainingDepth))
 			//fmt.Fprint(*w, "u,z="+strconv.Itoa(i)+" , "+z)
 			j.Uri = u
 			j.Scrape(w, remainingDepth)
@@ -81,19 +88,18 @@ func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
 
 		// Visit every url found and pull pix, "1 level deep"
 		/*for i, z := range urls {
-			//	fmt.Println(i, z)
+		//	fmt.Println(i, z)
 
-			if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
-				fmt.Println(i, " Saving "+z)
-				//	downloadFile(path+"/"+i+"jpg", z)
-			} else {
-				fmt.Println(i, "Visiting "+z)
-				//	savePictures(z)
-			}
-			//downloadFile(path, z)*/
-
-			// For each link, attempt to open
+		if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
+			fmt.Println(i, " Saving "+z)
+			//	downloadFile(path+"/"+i+"jpg", z)
+		} else {
+			fmt.Println(i, "Visiting "+z)
+			//	savePictures(z)
 		}
+		//downloadFile(path, z)*/
+
+		// For each link, attempt to open
 	}
 }
 
