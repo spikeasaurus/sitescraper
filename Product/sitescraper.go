@@ -29,7 +29,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// test output
-	fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize)
+	fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize+"\n\n\n")
 
 	// main loop
 	d := j.RecursionDepthInt()
@@ -80,11 +80,12 @@ func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
 		// i -- numbers every uri
 		for i, u := range urls {
 			// Print current value of remainingDepth:
-			fmt.Fprint(*w, "i = "+strconv.Itoa(i)+"\tRemaining Depth: "+strconv.Itoa(*remainingDepth))
+			fmt.Fprint(*w, "\ni = "+strconv.Itoa(i)+"___Remaining Depth: "+strconv.Itoa(*remainingDepth))
 			//fmt.Fprint(*w, "u,z="+strconv.Itoa(i)+" , "+z)
 			j.Uri = u
 			j.Scrape(w, remainingDepth)
 		}
+		fmt.Fprint(*w, "\n\n")
 
 		// Visit every url found and pull pix, "1 level deep"
 		/*for i, z := range urls {
