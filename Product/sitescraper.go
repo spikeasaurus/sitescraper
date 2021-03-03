@@ -43,48 +43,57 @@ type job struct {
 }
 
 // Scrape ...
-func (j job) Scrape(w *http.ResponseWriter) {
+func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
+	if *remainingDepth > 0 {
+		*remainingDepth--
 
-	// Issues GET to uri.
-	resp, err := http.Get(j.Uri)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	// Read the html contents
-	html, err := ioutil.ReadAll(resp.Body)
-
-	// Define what Url might look like
-	const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
-	acceptableImageTypes := "jpe?g|png|gif|bmp"
-	acceptableURLTypes := "html?"
-	fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
-	regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
-
-	// Use htmlSource from which to search
-	htmlStr := bytesToString(html)
-	urls := regex.FindAllString(htmlStr, -1)
-
-	// Visit every uri
-	for i, z := range urls {
-		fmt.Fprint(*w, "i,z="+strconv.Itoa(i)+" , "+z)
-	}
-
-	// Visit every url found and pull pix, "1 level deep"
-	for i, z := range urls {
-		//	fmt.Println(i, z)
-
-		if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
-			fmt.Println(i, " Saving "+z)
-			//	downloadFile(path+"/"+i+"jpg", z)
-		} else {
-			fmt.Println(i, "Visiting "+z)
-			//	savePictures(z)
+		// Issues GET to uri.
+		resp, err := http.Get(j.Uri)
+		if err != nil {
+			panic(err)
 		}
-		//downloadFile(path, z)
+		defer resp.Body.Close()
 
-		// For each link, attempt to open
+		// Read the html contents
+		html, err := ioutil.ReadAll(resp.Body)
+
+		// Define what Url might look like
+		const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
+		acceptableImageTypes := "jpe?g|png|gif|bmp"
+		acceptableURLTypes := "html?"
+		fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
+		regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
+
+		// Use htmlSource from which to search
+		htmlStr := bytesToString(html)
+		urls := regex.FindAllString(htmlStr, -1)
+
+		// Visit every uri
+		// u -- every uri
+		// i -- numbers every uri
+		for i, u := range urls {
+			// Print current value of remainingDepth:
+			fmt.Fprint(*w, "Remaining Depth: " + strconv.Itoa(remainingDepth))
+			//fmt.Fprint(*w, "u,z="+strconv.Itoa(i)+" , "+z)
+			j.Uri = u
+			j.Scrape(w, remainingDepth)
+		}
+
+		// Visit every url found and pull pix, "1 level deep"
+		/*for i, z := range urls {
+			//	fmt.Println(i, z)
+
+			if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
+				fmt.Println(i, " Saving "+z)
+				//	downloadFile(path+"/"+i+"jpg", z)
+			} else {
+				fmt.Println(i, "Visiting "+z)
+				//	savePictures(z)
+			}
+			//downloadFile(path, z)*/
+
+			// For each link, attempt to open
+		}
 	}
 }
 
