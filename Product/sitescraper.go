@@ -111,6 +111,6 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDept
 		}
 	} else {
 		// reset
-		//	remainingDepth = maxDepth
+		remainingDepth = maxDepth
 	}
 }
