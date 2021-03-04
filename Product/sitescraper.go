@@ -121,7 +121,7 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDept
 		for a := range foundThisInvocation {
 			j.Uri = foundThisInvocation[a]
 			fmt.Fprint((*w), " +--- ", a, " ", ShortenText(j.Uri, 75), "\n")
-			j.GetUrisFromPage(w, remainingDepth-1, maxDepth, uriList)
+			j.GetUrisFromPage(w, remainingDepth, maxDepth, uriList)
 		}
 	} else {
 		// reset
