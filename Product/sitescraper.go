@@ -31,9 +31,28 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// test output
 	fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize+"\n\n\n")
 
-	// main loop
-	d := j.RecursionDepthInt()
-	j.ScrapeUris(&w, 0, &d)
+	// main recursion loop
+	l := []string{}
+	j.GetUrisFromPage(&w, j.RecursionDepthInt(), &l)
+
+	// Print results
+	for i := range l {
+		fmt.Println(l[i][:Min(75, len(l[i]))])
+	}
+
+}
+
+// bytestoString ...
+func bytesToString(data []byte) string {
+	return string(data[:])
+}
+
+// Min returns the smaller of x or y.
+func Min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
 }
 
 type job struct {
@@ -49,13 +68,14 @@ func (j job) RecursionDepthInt() (r int) {
 	/// To do: error checking
 }
 
-// Scrape ...
-// i -- is which uri from the first (zeroth) layer of uris
-func (j job) ScrapeUris(w *http.ResponseWriter, n int, remainingDepth *int) {
-	if *remainingDepth > 0 {
-		*remainingDepth--
+// GetUrisFromPage ...
+// uriList *[]string is a growing list of URIs
+func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, uriList *[]string) {
 
-		// Issues GET to uri.
+	if remainingDepth > 0 {
+		remainingDepth--
+
+		// For element-n, issue GET to uri
 		resp, err := http.Get(j.Uri)
 		if err != nil {
 			panic(err)
@@ -72,49 +92,11 @@ func (j job) ScrapeUris(w *http.ResponseWriter, n int, remainingDepth *int) {
 		fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
 		regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
 
-		// Use htmlSource from which to search
+		// Use REGEX to search HTML BODY for URIs, and append them to uriList
 		htmlStr := bytesToString(html)
-		urls := regex.FindAllString(htmlStr, -1)
+		*uriList = append(*uriList, regex.FindAllString(htmlStr, -1)...)
 
-		// Visit every uri
-		// u -- every uri
-		// i -- numbers every uri
-		for i, u := range urls {
-
-			// Print current value of remainingDepth:
-			fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:Min(50, len(u))])
-			j.Uri = u
-			j.ScrapeUris(w, i, remainingDepth)
-
-		}
-		fmt.Fprint(*w, "\n\n")
-
+		// For each of the Urls we read, do the same thing (recurse), and dive deeper
+		j.GetUrisFromPage(w, remainingDepth, uriList)
 	}
 }
-
-func bytesToString(data []byte) string {
-	return string(data[:])
-}
-
-// Min returns the smaller of x or y.
-func Min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-// Visit every url found and pull pix, "1 level deep"
-/*for i, z := range urls {
-//	fmt.Println(i, z)
-
-if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
-	fmt.Println(i, " Saving "+z)
-	//	downloadFile(path+"/"+i+"jpg", z)
-} else {
-	fmt.Println(i, "Visiting "+z)
-	//	savePictures(z)
-}
-//downloadFile(path, z)*/
-
-// For each link, attempt to open
