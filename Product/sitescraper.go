@@ -50,7 +50,8 @@ func (j job) RecursionDepthInt() (r int) {
 }
 
 // Scrape ...
-func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
+// i -- is which uri from the first (zeroth) layer of uris
+func (j job) ScrapeUris(w *http.ResponseWriter, n int, remainingDepth *int) {
 	if *remainingDepth > 0 {
 		*remainingDepth--
 
@@ -79,29 +80,15 @@ func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
 		// u -- every uri
 		// i -- numbers every uri
 		for i, u := range urls {
+
 			// Print current value of remainingDepth:
 			fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:Min(50, len(u))])
-			//fmt.Fprint(*w, "u,z="+strconv.Itoa(i)+" , "+z)
 			j.Uri = u
-			j.Scrape(w, remainingDepth)
+			j.ScrapeUris(w, i, remainingDepth)
 
 		}
 		fmt.Fprint(*w, "\n\n")
 
-		// Visit every url found and pull pix, "1 level deep"
-		/*for i, z := range urls {
-		//	fmt.Println(i, z)
-
-		if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
-			fmt.Println(i, " Saving "+z)
-			//	downloadFile(path+"/"+i+"jpg", z)
-		} else {
-			fmt.Println(i, "Visiting "+z)
-			//	savePictures(z)
-		}
-		//downloadFile(path, z)*/
-
-		// For each link, attempt to open
 	}
 }
 
@@ -116,3 +103,18 @@ func Min(x, y int) int {
 	}
 	return y
 }
+
+// Visit every url found and pull pix, "1 level deep"
+/*for i, z := range urls {
+//	fmt.Println(i, z)
+
+if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
+	fmt.Println(i, " Saving "+z)
+	//	downloadFile(path+"/"+i+"jpg", z)
+} else {
+	fmt.Println(i, "Visiting "+z)
+	//	savePictures(z)
+}
+//downloadFile(path, z)*/
+
+// For each link, attempt to open
