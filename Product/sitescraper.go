@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // Sitescraper ...
@@ -47,7 +48,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 			out = append(out, listItem)
 		}
 	}
-	fmt.Fprint(w, out)
+	fmt.Fprint(w, strings.Trim(fmt.Sprint(out), "[]"))
 
 }
 
