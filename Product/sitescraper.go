@@ -80,7 +80,7 @@ func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
 		// i -- numbers every uri
 		for i, u := range urls {
 			// Print current value of remainingDepth:
-			fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:50])
+			fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:Min(50, len(u))])
 			//fmt.Fprint(*w, "u,z="+strconv.Itoa(i)+" , "+z)
 			j.Uri = u
 			j.Scrape(w, remainingDepth)
@@ -107,4 +107,12 @@ func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
 
 func bytesToString(data []byte) string {
 	return string(data[:])
+}
+
+// Min returns the smaller of x or y.
+func Min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
 }
