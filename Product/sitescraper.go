@@ -46,7 +46,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		if listItem[l-5:l-1] == "jpeg" || listItem[l-4:l-1] == "jpg" {
 			out = append(out, listItem)
 		}
-		//	fmt.Fprint(w, l[i][:Min(75, len(l[i]))], "\n")
+		fmt.Fprint(w, "\n\n", out, "\n")
 	}
 
 }
