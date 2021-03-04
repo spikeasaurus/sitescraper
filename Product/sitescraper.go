@@ -39,8 +39,13 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "\n---------------------------------------------------", "\n")
 	fmt.Fprint(w, "\n Work finished; results:", "\n\n")
 
-	for i := range l {
-		fmt.Fprint(w, "  -  ", j.GetShortenedUri(l[i], 75), "\n")
+	out := []string{}
+	for _, listItem := range l {
+		fmt.Fprint(w, "  -  ", j.GetShortenedUri(listItem, 75), "\n")
+		l := len(listItem)
+		if listItem[l-5:l-1] == "jpeg" || listItem[l-4:l-1] == "jpg" {
+			out = append(out, listItem)
+		}
 		//	fmt.Fprint(w, l[i][:Min(75, len(l[i]))], "\n")
 	}
 
@@ -82,6 +87,8 @@ func (j job) RecursionDepthInt() (r int) {
 	return r
 	/// To do: error checking
 }
+
+//
 
 // GetUrisFromPage ...
 // uriList *[]string is a growing list of URIs
