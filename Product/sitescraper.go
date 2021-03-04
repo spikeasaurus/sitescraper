@@ -36,6 +36,9 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	j.GetUrisFromPage(&w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l)
 
 	// Print results
+	fmt.Fprint((*w), "\n---------------------------------------------------", "\n")
+	fmt.Fprint((*w), "\n Work finished; results:", "\n\n")
+
 	for i := range l {
 		fmt.Fprint(w, "  -  ", j.GetShortenedUri(l[i], 75), "\n")
 		//	fmt.Fprint(w, l[i][:Min(75, len(l[i]))], "\n")
@@ -85,7 +88,7 @@ func (j job) RecursionDepthInt() (r int) {
 func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string) {
 
 	// debug
-	fmt.Fprint((*w), "\n---------------------------------------------------", remainingDepth, "\n")
+	fmt.Fprint((*w), "\n---------------------------------------------------", "\n")
 	fmt.Fprint((*w), " - ", remainingDepth, "\n")
 	fmt.Fprint((*w), " - ", j.Uri, "\n")
 
