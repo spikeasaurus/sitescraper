@@ -37,7 +37,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// Print results
 	for i := range l {
-		fmt.Fprint(w, j.GetShortenedUri(l[i], 75))
+		fmt.Fprint(w, "  -  ", j.GetShortenedUri(l[i], 75), "\n"
 		//	fmt.Fprint(w, l[i][:Min(75, len(l[i]))], "\n")
 	}
 
@@ -86,13 +86,11 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDept
 
 	// debug
 	fmt.Fprint((*w), "\n---------------------------------------------------", remainingDepth, "\n")
-	fmt.Fprint((*w), "MAJOR NODE DEPTH = ", remainingDepth, "\n")
-	fmt.Fprint((*w), "Current URI = ", j.Uri, "\n")
+	fmt.Fprint((*w), " - ", remainingDepth, "\n")
+	fmt.Fprint((*w), " - ", j.Uri, "\n")
 
 	if remainingDepth > 0 {
 		remainingDepth--
-
-		fmt.Fprint((*w), "minor remaining depth = ", remainingDepth, "\n")
 
 		// For element-n, issue GET to uri
 		resp, err := http.Get(j.Uri)
@@ -120,12 +118,12 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDept
 
 		for a := range foundThisInvocation {
 			j.Uri = foundThisInvocation[a]
-			fmt.Fprint((*w), "   - ", a, ShortenText(j.Uri, 75))
+			fmt.Fprint((*w), " +--- ", a, ShortenText(j.Uri, 75), "\n")
 			j.GetUrisFromPage(w, remainingDepth, maxDepth, uriList)
 		}
 	} else {
 		// reset
 		remainingDepth = maxDepth
-		fmt.Fprint((*w), "Reached the end of ", ShortenText(j.Uri, 75), "\n")
+		fmt.Fprint((*w), " - Reached the end of ", ShortenText(j.Uri, 75), "\n")
 	}
 }
