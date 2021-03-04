@@ -43,7 +43,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	for _, listItem := range l {
 		fmt.Fprint(w, "  -  ", j.GetShortenedUri(listItem, 75), "\n")
 		length := len(listItem)
-		if listItem[length-5:length-1] == "jpeg" || listItem[length-4:length-1] == "jpg" {
+		if listItem[length-3:] == "jpg" || listItem[length-4:] == "jpeg" {
 			out = append(out, listItem)
 		}
 	}
