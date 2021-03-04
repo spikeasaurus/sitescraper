@@ -37,7 +37,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// Print results
 	for i := range l {
-		fmt.Println(l[i][:Min(75, len(l[i]))])
+		fmt.Fprint(w, l[i][:Min(75, len(l[i]))])
 	}
 
 }
@@ -74,6 +74,8 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, uriList
 
 	if remainingDepth > 0 {
 		remainingDepth--
+
+		fmt.Fprint((*w), "remaining depth = ", remainingDepth, "\n")
 
 		// For element-n, issue GET to uri
 		resp, err := http.Get(j.Uri)
