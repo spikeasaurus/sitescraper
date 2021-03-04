@@ -114,10 +114,11 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		// Define what Url might look like
 		const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
-		acceptableImageTypes := "jpe?g|png|gif|bmp"
-		acceptableURLTypes := "html?"
-		fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
-		regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
+		//	acceptableImageTypes := "jpe?g|png|gif|bmp"
+		//	acceptableURLTypes := "html?"
+		//	fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
+		//	regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
+		regex := regexp.MustCompile(urlRegexSyntax)
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
 		htmlStr := bytesToString(html)
