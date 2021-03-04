@@ -100,12 +100,17 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDept
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
 		htmlStr := bytesToString(html)
-		*uriList = append(*uriList, regex.FindAllString(htmlStr, -1)...)
+		foundThisInvocation := regex.FindAllString(htmlStr, -1)
+		*uriList = append(*uriList, foundThisInvocation...)
 
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
-		j.GetUrisFromPage(w, remainingDepth, maxDepth, uriList)
+
+		for a := range foundThisInvocation {
+			j.Uri = foundThisInvocation[a]
+			j.GetUrisFromPage(w, remainingDepth, maxDepth, uriList)
+		}
 	} else {
 		// reset
-		remainingDepth = maxDepth
+		//	remainingDepth = maxDepth
 	}
 }
