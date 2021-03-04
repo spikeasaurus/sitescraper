@@ -33,7 +33,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// main loop
 	d := j.RecursionDepthInt()
-	j.Scrape(&w, &d)
+	j.ScrapeUris(&w, 0, &d)
 }
 
 type job struct {
