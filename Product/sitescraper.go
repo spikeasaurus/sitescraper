@@ -90,10 +90,9 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDept
 	// debug
 	fmt.Fprint((*w), "\n---------------------------------------------------", "\n")
 	fmt.Fprint((*w), " - ", remainingDepth, "\n")
-	fmt.Fprint((*w), " - ", j.Uri, "\n")
+	fmt.Fprint((*w), " - Searching under: ", j.Uri, "\n")
 
 	if remainingDepth > 0 {
-		remainingDepth--
 
 		// For element-n, issue GET to uri
 		resp, err := http.Get(j.Uri)
@@ -122,7 +121,7 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDept
 		for a := range foundThisInvocation {
 			j.Uri = foundThisInvocation[a]
 			fmt.Fprint((*w), " +--- ", a, " ", ShortenText(j.Uri, 75), "\n")
-			j.GetUrisFromPage(w, remainingDepth, maxDepth, uriList)
+			j.GetUrisFromPage(w, remainingDepth-1, maxDepth, uriList)
 		}
 	} else {
 		// reset
