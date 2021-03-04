@@ -33,7 +33,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// main recursion loop
 	l := []string{}
-	j.GetUrisFromPage(&w, j.RecursionDepthInt(), &l)
+	j.GetUrisFromPage(&w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l)
 
 	// Print results
 	for i := range l {
@@ -70,7 +70,7 @@ func (j job) RecursionDepthInt() (r int) {
 
 // GetUrisFromPage ...
 // uriList *[]string is a growing list of URIs
-func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, uriList *[]string) {
+func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string) {
 
 	// debug
 	fmt.Fprint((*w), "\n---------------------------------------------------", remainingDepth, "\n")
@@ -103,6 +103,9 @@ func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, uriList
 		*uriList = append(*uriList, regex.FindAllString(htmlStr, -1)...)
 
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
-		j.GetUrisFromPage(w, remainingDepth, uriList)
+		j.GetUrisFromPage(w, remainingDepth, maxDepth, uriList)
+	} else {
+		// reset
+		remainingDepth = maxDepth
 	}
 }
