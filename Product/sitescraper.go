@@ -19,7 +19,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&j); err != nil {
 		switch err {
 		case io.EOF:
-			fmt.Fprint(w, "EOF")
+			// fmt.Fprint(w, "EOF")
 			return
 		default:
 			log.Printf("json.NewDecoder: %v", err)
@@ -29,32 +29,32 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// test output
-	fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize+"\n\n\n")
+	// fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize+"\n\n\n")
 
 	// main recursion loop
 	l := []string{}
 	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l)
 
 	// Print results
-	fmt.Fprint(w, "\n---------------------------------------------------", "\n")
-	fmt.Fprint(w, "\n Work finished; results:", "\n\n")
+	// fmt.Fprint(w, "\n---------------------------------------------------", "\n")
+	// fmt.Fprint(w, "\n Work finished; results:", "\n\n")
 
 	out := []string{}
 	for _, listItem := range l {
-		fmt.Fprint(w, "  -  ", j.GetShortenedUri(listItem, 75), "\n")
+		// fmt.Fprint(w, "  -  ", j.GetShortenedUri(listItem, 75), "\n")
 		length := len(listItem)
 		if listItem[length-3:] == "jpg" || listItem[length-4:] == "jpeg" {
 			out = append(out, listItem)
 		}
 	}
-	fmt.Fprint(w, "\n\n", out, "\n")
+	fmt.Fprint(w, out)
 
 }
 
 // GetShortenedUri ...
 func (j job) GetShortenedUri(str string, truncateLength int) string {
 	return ShortenText(str, truncateLength)
-	//	fmt.Fprint((*w), str[:Min(truncateLength, len(str[truncateLength]))], "\n")
+	//	// fmt.Fprint((*w), str[:Min(truncateLength, len(str[truncateLength]))], "\n")
 }
 
 // ShortenText ...
@@ -95,9 +95,9 @@ func (j job) RecursionDepthInt() (r int) {
 func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string) {
 
 	// debug
-	fmt.Fprint((*w), "\n---------------------------------------------------", "\n")
-	fmt.Fprint((*w), " - ", remainingDepth, "\n")
-	fmt.Fprint((*w), " - Searching under: ", uri, "\n")
+	// fmt.Fprint((*w), "\n---------------------------------------------------", "\n")
+	// fmt.Fprint((*w), " - ", remainingDepth, "\n")
+	// fmt.Fprint((*w), " - Searching under: ", uri, "\n")
 
 	if remainingDepth > 0 {
 
@@ -122,20 +122,20 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
 		*uriList = append(*uriList, foundThisInvocation...)
-		fmt.Fprint((*w), " - Total URIs: ", len(*uriList), " (", len(foundThisInvocation), ") found this pass\n")
-		fmt.Fprint((*w), " - Read BODY: ", len(htmlStr), " characters\n")
-		fmt.Fprint((*w), " - Found this invocation: ", len(foundThisInvocation), "\n")
+		// fmt.Fprint((*w), " - Total URIs: ", len(*uriList), " (", len(foundThisInvocation), ") found this pass\n")
+		// fmt.Fprint((*w), " - Read BODY: ", len(htmlStr), " characters\n")
+		// fmt.Fprint((*w), " - Found this invocation: ", len(foundThisInvocation), "\n")
 
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
 
 		for n, foundUri := range foundThisInvocation {
 			uri = foundThisInvocation[n]
-			fmt.Fprint((*w), " +--- ", n, " ", ShortenText(foundUri, 75), "\n")
+			// fmt.Fprint((*w), " +--- ", n, " ", ShortenText(foundUri, 75), "\n")
 			GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList)
 		}
 	} else {
 		// reset
 		remainingDepth = maxDepth
-		fmt.Fprint((*w), " - Reached the end of ", ShortenText(uri, 75), "\n")
+		// fmt.Fprint((*w), " - Reached the end of ", ShortenText(uri, 75), "\n")
 	}
 }
