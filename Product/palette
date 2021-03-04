@@ -1,0 +1,128 @@
+
+func (j job) ScrapeUris(w *http.ResponseWriter, remainingDepth *int) {
+
+	// scrape every uri on this page
+
+	// u -- every uri
+	// i -- numbers every uri
+	for n, u := range urls {
+
+		// Print current value of remainingDepth:
+		fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:Min(50, len(u))])
+		j.Uri = u
+		j.ScrapeUris(w, i, remainingDepth)
+
+	}
+	j.ScrapeUris()
+
+	// start at element-n
+	if *remainingDepth > 0 {
+		*remainingDepth--
+
+		// For element-n, issue GET to uri.
+		resp, err := http.Get(j.Uri)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		// Read the html contents
+		html, err := ioutil.ReadAll(resp.Body)
+
+		// Define what Url might look like
+		const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
+		acceptableImageTypes := "jpe?g|png|gif|bmp"
+		acceptableURLTypes := "html?"
+		fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
+		regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
+
+		// Use htmlSource from which to search
+		htmlStr := bytesToString(html)
+		urls := regex.FindAllString(htmlStr, -1)
+
+		// Visit every uri
+		// u -- every uri
+		// i -- numbers every uri
+		for i, u := range urls {
+
+			// Print current value of remainingDepth:
+			fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:Min(50, len(u))])
+			j.Uri = u
+			j.ScrapeUris(w, i, remainingDepth)
+
+		}
+		fmt.Fprint(*w, "\n\n")
+
+	}
+}
+
+// Scrape ...
+// i -- is which uri from the first (zeroth) layer of uris
+/*func (j job) ScrapeUris(w *http.ResponseWriter, n int, remainingDepth *int) {
+	// start at element-n
+	if *remainingDepth > 0 {
+		*remainingDepth--
+
+		// For element-n, issues GET to uri.
+		resp, err := http.Get(j.Uri)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		// Read the html contents
+		html, err := ioutil.ReadAll(resp.Body)
+
+		// Define what Url might look like
+		const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
+		acceptableImageTypes := "jpe?g|png|gif|bmp"
+		acceptableURLTypes := "html?"
+		fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
+		regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
+
+		// Use htmlSource from which to search
+		htmlStr := bytesToString(html)
+		urls := regex.FindAllString(htmlStr, -1)
+
+		// Visit every uri
+		// u -- every uri
+		// i -- numbers every uri
+		for i, u := range urls {
+
+			// Print current value of remainingDepth:
+			fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:Min(50, len(u))])
+			j.Uri = u
+			j.ScrapeUris(w, i, remainingDepth)
+
+		}
+		fmt.Fprint(*w, "\n\n")
+
+	}
+}*/
+
+func bytesToString(data []byte) string {
+	return string(data[:])
+}
+
+// Min returns the smaller of x or y.
+func Min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+// Visit every url found and pull pix, "1 level deep"
+/*for i, z := range urls {
+//	fmt.Println(i, z)
+
+if z[len(z)-3:] == "jpg" || z[len(z)-4:] == "jpeg" {
+	fmt.Println(i, " Saving "+z)
+	//	downloadFile(path+"/"+i+"jpg", z)
+} else {
+	fmt.Println(i, "Visiting "+z)
+	//	savePictures(z)
+}
+//downloadFile(path, z)*/
+
+// For each link, attempt to open
