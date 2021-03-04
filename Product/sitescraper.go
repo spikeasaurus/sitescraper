@@ -115,6 +115,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
 		*uriList = append(*uriList, foundThisInvocation...)
+		fmt.Fprint((*w), " - Total URIs: ", len(*uriList), " (", len(foundThisInvocation), ") found this pass\n")
 		fmt.Fprint((*w), " - Read BODY: ", len(htmlStr), " characters\n")
 		fmt.Fprint((*w), " - Found this invocation: ", len(foundThisInvocation), "\n")
 
