@@ -37,7 +37,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// Print results
 	for i := range l {
-		fmt.Fprint(w, "  -  ", j.GetShortenedUri(l[i], 75), "\n"
+		fmt.Fprint(w, "  -  ", j.GetShortenedUri(l[i], 75), "\n")
 		//	fmt.Fprint(w, l[i][:Min(75, len(l[i]))], "\n")
 	}
 
