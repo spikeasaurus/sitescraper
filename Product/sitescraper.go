@@ -80,10 +80,11 @@ func (j job) Scrape(w *http.ResponseWriter, remainingDepth *int) {
 		// i -- numbers every uri
 		for i, u := range urls {
 			// Print current value of remainingDepth:
-			fmt.Fprint(*w, "\ni = "+strconv.Itoa(i)+"___Remaining Depth: "+strconv.Itoa(*remainingDepth))
+			fmt.Fprint(*w, "\ni="+strconv.Itoa(i)+"___Remaining_Depth="+strconv.Itoa(*remainingDepth)+"___URI="+u[:50])
 			//fmt.Fprint(*w, "u,z="+strconv.Itoa(i)+" , "+z)
 			j.Uri = u
 			j.Scrape(w, remainingDepth)
+
 		}
 		fmt.Fprint(*w, "\n\n")
 
