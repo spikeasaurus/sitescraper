@@ -72,10 +72,14 @@ func (j job) RecursionDepthInt() (r int) {
 // uriList *[]string is a growing list of URIs
 func (j job) GetUrisFromPage(w *http.ResponseWriter, remainingDepth int, uriList *[]string) {
 
+	// debug
+	fmt.Fprint((*w), "\n---------------------------------------------------", remainingDepth, "\n")
+	fmt.Fprint((*w), "MAJOR NODE DEPTH = ", remainingDepth, "\n")
+
 	if remainingDepth > 0 {
 		remainingDepth--
 
-		fmt.Fprint((*w), "remaining depth = ", remainingDepth, "\n")
+		fmt.Fprint((*w), "minor remaining depth = ", remainingDepth, "\n")
 
 		// For element-n, issue GET to uri
 		resp, err := http.Get(j.Uri)
