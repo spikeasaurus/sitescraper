@@ -108,10 +108,9 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			panic(err)
 		}
 		//defer resp.Body.Close()
-		body := resp.Body
 
 		// Read the html contents
-		html, err := ioutil.ReadAll(body)
+		html, err := ioutil.ReadAll(resp.Body)
 
 		// Close
 		resp.Body.Close()
