@@ -1,6 +1,7 @@
 package sitescraper
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -103,6 +104,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 	if remainingDepth > 0 {
 
 		// For element-n, issue GET to uri
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		resp, err := http.Get(uri)
 		if err != nil {
 			panic(err)
