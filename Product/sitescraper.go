@@ -109,10 +109,12 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		}
 		//defer resp.Body.Close()
 		body := resp.Body
-		resp.Body.Close()
 
 		// Read the html contents
 		html, err := ioutil.ReadAll(body)
+
+		// Close
+		resp.Body.Close()
 
 		// Define what Url might look like
 		const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
