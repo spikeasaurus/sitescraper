@@ -104,8 +104,12 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 	if remainingDepth > 0 {
 
 		// For element-n, issue GET to uri
+		customTransport := http.DefaultTransport.(*http.Transport).Clone()
+		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		client := &http.Client{Transport: customTransport}
+
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		resp, err := http.Get(uri)
+		resp, err := client.Get(uri)
 		if err != nil {
 			panic(err)
 		}
