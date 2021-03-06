@@ -111,7 +111,8 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		resp, err := client.Get(uri)
 		if err != nil {
-			panic(err)
+			//	panic(err)
+
 		}
 		//defer resp.Body.Close()
 
