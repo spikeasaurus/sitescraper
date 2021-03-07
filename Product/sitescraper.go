@@ -36,7 +36,8 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// main recursion loop
 	l := []string{}
-	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l)
+
+	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex)
 
 	// Print results
 	// fmt.Fprint(w, "\n---------------------------------------------------", "\n")
@@ -79,10 +80,11 @@ func Min(x, y int) int {
 }
 
 type job struct {
-	Uri             string `json:"uri"`
-	Extension       string `json:"ext"`
-	RecursionDepth  string `json:"recursiondepth"`
-	MinimumFileSize string `json:"minfilesize"`
+	Uri               string `json:"uri"`
+	Extension         string `json:"ext"`
+	RecursionDepth    string `json:"recursiondepth"`
+	MinimumFileSize   string `json:"minfilesize"`
+	ValidDomainsRegex string `json:"validdomains"`
 }
 
 func (j job) RecursionDepthInt() (r int) {
@@ -101,7 +103,7 @@ func RecoverGetUrisFromPage() {
 
 // GetUrisFromPage ...
 // uriList *[]string is a growing list of URIs
-func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string) {
+func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string) {
 
 	// debug
 	// fmt.Fprint((*w), "\n---------------------------------------------------", "\n")
@@ -135,17 +137,15 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		}()
 
 		// Define what Url might look like
-		const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
-		//	acceptableImageTypes := "jpe?g|png|gif|bmp"
-		//	acceptableURLTypes := "html?"
-		//	fileExtensionSyntax := "(" + acceptableImageTypes + "|" + acceptableURLTypes + ")"
-		//	regex := regexp.MustCompile(urlRegexSyntax + fileExtensionSyntax)
+
+		urlRegexSyntax := `[-a-zA-Z0-9@:%._\+~#=]{1,256}(` + *validDomainsRegex + `)\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
 		regex := regexp.MustCompile(urlRegexSyntax)
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
 		*uriList = append(*uriList, foundThisInvocation...)
+
 		// fmt.Fprint((*w), " - Total URIs: ", len(*uriList), " (", len(foundThisInvocation), ") found this pass\n")
 		// fmt.Fprint((*w), " - Read BODY: ", len(htmlStr), " characters\n")
 		// fmt.Fprint((*w), " - Found this invocation: ", len(foundThisInvocation), "\n")
@@ -155,7 +155,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		for n, foundUri := range foundThisInvocation {
 			uri = foundThisInvocation[n]
 			// fmt.Fprint((*w), " +--- ", n, " ", ShortenText(foundUri, 75), "\n")
-			GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList)
+			GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex)
 		}
 	} else {
 		// reset
