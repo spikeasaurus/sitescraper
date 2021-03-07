@@ -138,13 +138,13 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		// Define what Url might look like
 
-		urlRegexSyntax := `((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))`
+		urlRegexSyntax := `((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
 		regex := regexp.MustCompile(urlRegexSyntax)
 
 		fmt.Fprint((*w), urlRegexSyntax, "\n\n", urlRegexSyntax)
 
 		var urlSubSyntax string = `([^\s]*` + (*validDomainsRegex) + `[^\s]*)`
-		urlRegexSyntaxSubmatched := regex.FindStringSubmatch(urlSubSyntax)
+		urlRegexSyntaxSubmatched := regex.FindStringSubmatch(urlSubSyntax)[1]
 
 		fmt.Fprint((*w), urlRegexSyntaxSubmatched)
 		//				   (?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))([^\s]*`  (imagevenue)           [^\s]*)
