@@ -36,8 +36,9 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// main recursion loop
 	l := []string{}
+	var alreadyChecked map[string]bool
 
-	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex)
+	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, &alreadyChecked)
 
 	// Print results
 	// fmt.Fprint(w, "\n---------------------------------------------------", "\n")
@@ -103,7 +104,7 @@ func RecoverGetUrisFromPage() {
 
 // GetUrisFromPage ...
 // uriList *[]string is a growing list of URIs
-func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string) {
+func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked *map[string]bool) {
 
 	if remainingDepth > 0 {
 
@@ -146,8 +147,14 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
 		for n, foundUri := range foundThisInvocation {
-			uri = foundThisInvocation[n]
-			GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex)
+			// Did we process this already?
+			if (*alreadyChecked)[foundUri] == false {
+				uri = foundThisInvocation[n]
+				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked)
+
+				// Switch hash table to indicate this URI has already been checked
+				(*alreadyChecked)[foundUri] = true
+			}
 		}
 
 	} else {
