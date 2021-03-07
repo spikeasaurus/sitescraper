@@ -117,7 +117,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 			customTransport := http.DefaultTransport.(*http.Transport).Clone()
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-			client := &http.Client{Transport: customTransport, Timeout: 10 * time.Second}
+			client := &http.Client{Transport: customTransport, Timeout: 30 * time.Second}
 
 			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
