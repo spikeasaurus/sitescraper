@@ -138,11 +138,13 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		// Define what Url might look like
 
-		urlRegexSyntax := `(?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))([^\s]*` + *validDomainsRegex + `[^\s]*)`
-		fmt.Fprint((*w), urlRegexSyntax)
-		//				   (?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))([^\s]*`  (imagevenue)           [^\s]*)
-
+		urlRegexSyntax := `(?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))`
 		regex := regexp.MustCompile(urlRegexSyntax)
+		var urlSubSyntax string = `([\s]*` + (*validDomainsRegex) + `[^\s]*)`
+		urlRegexSyntaxSubmatched := regex.FindStringSubmatch(urlSubSyntax)
+
+		fmt.Fprint((*w), urlRegexSyntaxSubmatched)
+		//				   (?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))([^\s]*`  (imagevenue)           [^\s]*)
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
 		htmlStr := bytesToString(html)
