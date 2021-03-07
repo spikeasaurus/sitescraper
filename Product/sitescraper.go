@@ -105,11 +105,6 @@ func RecoverGetUrisFromPage() {
 // uriList *[]string is a growing list of URIs
 func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string) {
 
-	// debug
-	// fmt.Fprint((*w), "\n---------------------------------------------------", "\n")
-	// fmt.Fprint((*w), " - ", remainingDepth, "\n")
-	// fmt.Fprint((*w), " - Searching under: ", uri, "\n")
-
 	if remainingDepth > 0 {
 
 		// For element-n, issue GET to uri
@@ -136,9 +131,8 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			return html, err
 		}()
 
-		// Define what Url might look like
-
-		urlRegexSyntax := `((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
+		// Use REGEX to search HTML BODY for URIs, and append them to uriList
+		urlRegexSyntax := `@^(https?|ftp)://[^\s/$.?#].[^\s]*$@iS`
 		regex := regexp.MustCompile(urlRegexSyntax)
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
@@ -148,34 +142,16 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
 		fmt.Fprint((*w), "this invocation 2\n", foundThisInvocation)
-
-		///	var urlSubSyntax string = `([^\s]*` + (*validDomainsRegex) + `[^\s]*)`
-		//	regex.Sub
-
-		//
-
-		//fmt.Fprint((*w), foundThisInvocation)
-		//				   (?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))([^\s]*`  (imagevenue)           [^\s]*)
-
-		// Use REGEX to search HTML BODY for URIs, and append them to uriList
-		//htmlStr := bytesToString(html)
-		//foundThisInvocation := regex.FindAllString(htmlStr, -1)
 		*uriList = append(*uriList, foundThisInvocation...)
 
-		// fmt.Fprint((*w), " - Total URIs: ", len(*uriList), " (", len(foundThisInvocation), ") found this pass\n")
-		// fmt.Fprint((*w), " - Read BODY: ", len(htmlStr), " characters\n")
-		// fmt.Fprint((*w), " - Found this invocation: ", len(foundThisInvocation), "\n")
-
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
-
 		for n, foundUri := range foundThisInvocation {
 			uri = foundThisInvocation[n]
-			// fmt.Fprint((*w), " +--- ", n, " ", ShortenText(foundUri, 75), "\n")
 			GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex)
 		}
+
 	} else {
 		// reset
 		remainingDepth = maxDepth
-		// fmt.Fprint((*w), " - Reached the end of ", ShortenText(uri, 75), "\n")
 	}
 }
