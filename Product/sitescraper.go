@@ -140,19 +140,21 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		urlRegexSyntax := `((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
 		regex := regexp.MustCompile(urlRegexSyntax)
+		htmlStr := bytesToString(html)
+		foundThisInvocation := regex.FindAllString(strings.Join(regex.FindAllString(htmlStr, -1), " "), -1)
 
-		fmt.Fprint((*w), urlRegexSyntax, "\n\n", urlRegexSyntax)
+		///	var urlSubSyntax string = `([^\s]*` + (*validDomainsRegex) + `[^\s]*)`
+		//	regex.Sub
 
-		var urlSubSyntax string = `([^\s]*` + (*validDomainsRegex) + `[^\s]*)`
-		urlRegexSyntaxSubmatched := regex.FindStringSubmatch(urlSubSyntax)[0]
+		//
 
-		fmt.Fprint((*w), urlRegexSyntaxSubmatched)
+		//fmt.Fprint((*w), foundThisInvocation)
 		//				   (?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))([^\s]*`  (imagevenue)           [^\s]*)
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
-		htmlStr := bytesToString(html)
-		foundThisInvocation := regex.FindAllString(htmlStr, -1)
-		*uriList = append(*uriList, foundThisInvocation...)
+		//htmlStr := bytesToString(html)
+		//foundThisInvocation := regex.FindAllString(htmlStr, -1)
+		//*uriList = append(*uriList, foundThisInvocation...)
 
 		// fmt.Fprint((*w), " - Total URIs: ", len(*uriList), " (", len(foundThisInvocation), ") found this pass\n")
 		// fmt.Fprint((*w), " - Read BODY: ", len(htmlStr), " characters\n")
