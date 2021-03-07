@@ -143,7 +143,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		fmt.Fprint((*w), urlRegexSyntax, "\n\n", urlRegexSyntax)
 
-		var urlSubSyntax string = `([\s]*` + (*validDomainsRegex) + `[^\s]*)`
+		var urlSubSyntax string = `([^\s]*` + (*validDomainsRegex) + `[^\s]*)`
 		urlRegexSyntaxSubmatched := regex.FindStringSubmatch(urlSubSyntax)
 
 		fmt.Fprint((*w), urlRegexSyntaxSubmatched)
