@@ -104,23 +104,25 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 	if remainingDepth > 0 {
 
 		// For element-n, issue GET to uri
-		customTransport := http.DefaultTransport.(*http.Transport).Clone()
-		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		client := &http.Client{Transport: customTransport}
+		html, _ := func() ([]byte, error) {
+			customTransport := http.DefaultTransport.(*http.Transport).Clone()
+			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			client := &http.Client{Transport: customTransport}
 
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		resp, err := client.Get(uri)
-		if err != nil {
-			//	panic(err)
+			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-		}
-		//defer resp.Body.Close()
+			resp, err := client.Get(uri)
+			html, err := ioutil.ReadAll(resp.Body)
 
-		// Read the html contents
-		html, err := ioutil.ReadAll(resp.Body)
+			// Close
+			resp.Body.Close()
 
-		// Close
-		resp.Body.Close()
+			if err := recover(); err != nil {
+				fmt.Println(err)
+			}
+
+			return html, err
+		}()
 
 		// Define what Url might look like
 		const urlRegexSyntax = `https?://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
