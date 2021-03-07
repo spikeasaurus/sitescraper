@@ -132,7 +132,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		}()
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
-		urlRegexSyntax := `@^(https?|ftp)://[^\s/$.?#].[^\s]*$@iS`
+		urlRegexSyntax := `[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)`
 		regex := regexp.MustCompile(urlRegexSyntax)
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
