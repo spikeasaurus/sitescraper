@@ -127,7 +127,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			resp.Body.Close()
 
 			if err := recover(); err != nil {
-				fmt.Println(err)
+				fmt.Println("Error: ", err)
 			}
 
 			return html, err
