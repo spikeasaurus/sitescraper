@@ -141,7 +141,9 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		urlRegexSyntax := `((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
 		regex := regexp.MustCompile(urlRegexSyntax)
 		htmlStr := bytesToString(html)
-		foundThisInvocation := regex.FindAllString(strings.Join(regex.FindAllString(htmlStr, -1), " "), -1)
+		foundThisInvocation := regex.FindAllString(htmlStr, -1)
+		regex2 := regexp.MustCompile(*validDomainsRegex)
+		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
 		///	var urlSubSyntax string = `([^\s]*` + (*validDomainsRegex) + `[^\s]*)`
 		//	regex.Sub
