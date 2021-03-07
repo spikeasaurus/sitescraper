@@ -92,6 +92,12 @@ func (j job) RecursionDepthInt() (r int) {
 
 //
 
+func RecoverGetUrisFromPage() {
+	if r := recover() r != nil {
+		// recovered
+	}
+}
+
 // GetUrisFromPage ...
 // uriList *[]string is a growing list of URIs
 func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string) {
@@ -105,6 +111,9 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		// For element-n, issue GET to uri
 		html, _ := func() ([]byte, error) {
+
+			defer RecoverGetUrisFromPage()
+			
 			customTransport := http.DefaultTransport.(*http.Transport).Clone()
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 			client := &http.Client{Transport: customTransport}
