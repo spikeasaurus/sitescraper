@@ -139,8 +139,6 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		// Define what Url might look like
 
 		urlRegexSyntax := `(?=((https?:\/\/)?)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))([^\s]*` + *validDomainsRegex + `[^\s]*)`
-
-		//`(` + *validDomainsRegex + `)([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))`
 		regex := regexp.MustCompile(urlRegexSyntax)
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
