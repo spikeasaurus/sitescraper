@@ -44,8 +44,13 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	finalCleanup := new(map[string]bool)
 	*finalCleanup = make(map[string]bool)
 
+	// Extensions in map format:
+	exts := new(map[string]bool)
+	*exts = make(map[string]bool)
+	*exts = j.GetExtensions()
+
 	// Main recursion entry point
-	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked)
+	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked, exts)
 
 	if DEBUG == true {
 		fmt.Fprint(w, "\nDEBUG\t---Generating list of downloadable files: ", len(l), " collected")
@@ -56,17 +61,16 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		if DEBUG == true {
 			fmt.Fprint(w, "\nDEBUG\t------Examining item ", n, ": ", listItem)
 		}
-		length := len(listItem)
 		// URI extensions have 3 or 4 len
-		if listItem[length-3:] == "jpg" || listItem[length-4:] == "jpeg" {
+		if MatchesExtension(listItem, exts) {
 			out = append(out, listItem)
 			if DEBUG == true {
 				fmt.Fprint(w, "\nDEBUG\t----------Adding to list of downloadable files: ", listItem)
 			}
 		}
 	}
-	// Clean up duplicates
 
+	// Clean up duplicates
 	finalList := []string{}
 	RemoveDuplicates(&w, &out, &finalList, finalCleanup)
 
@@ -79,11 +83,29 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// MatchesExtension ...
+// TO DO: A better way to check for too short file names
+func MatchesExtension(str string, ext *map[string]bool) bool {
+	// The shortest possible file name is something like A.jpg; anything shorter, and idk.
+	if len(str) < 6 {
+		return false
+	}
+	return (*ext)[str]
+}
+
 // GetShortenedUri ...
 // Truncate a URI safety from whatever length to another shorter length
 func (j job) GetShortenedUri(str string, truncateLength int) string {
 	return ShortenText(str, truncateLength)
 	//	// fmt.Fprint((*w), str[:Min(truncateLength, len(str[truncateLength]))], "\n")
+}
+
+// GetExtensions ...
+func (j job) GetExtensions() (extensions map[string]bool) {
+	for _, ext := range j.Extensions {
+		extensions[ext] = true
+	}
+	return extensions
 }
 
 // RemoveDuplicates ....
@@ -131,11 +153,11 @@ func Min(x, y int) int {
 
 // These are the things the user can POST to us.
 type job struct {
-	Uri               string `json:"uri"`
-	Extension         string `json:"ext"`
-	RecursionDepth    string `json:"recursiondepth"`
-	MinimumFileSize   string `json:"minfilesize"`
-	ValidDomainsRegex string `json:"validdomains"`
+	Uri               string   `json:"uri"`
+	Extensions        []string `json:"ext"`
+	RecursionDepth    string   `json:"recursiondepth"`
+	MinimumFileSize   string   `json:"minfilesize"`
+	ValidDomainsRegex string   `json:"validdomains"`
 }
 
 // RecursionDepthInt ...
@@ -156,7 +178,7 @@ func RecoverGetUrisFromPage() {
 
 // GetUrisFromPage ...
 // uriList *[]string is a growing list of URIs
-func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked *map[string]bool) {
+func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked *map[string]bool, extensions *map[string]bool) {
 
 	if DEBUG == true {
 		fmt.Fprint((*w), "\nDEBUG\tRemaining Depth: ", remainingDepth)
@@ -213,7 +235,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				}
 
 				// Recurse deeper
-				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked)
+				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked, extensions)
 
 				// Switch hash table to indicate this URI has already been checked
 				(*alreadyChecked)[foundUri] = true
