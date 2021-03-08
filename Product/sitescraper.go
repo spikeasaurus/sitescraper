@@ -59,7 +59,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	fmt.Fprint(w, "URIs found: len(out), "\n\n\n\n\n")
+	fmt.Fprint(w, "URIs found:", len(out), "\n\n\n\n\n")
 	fmt.Fprint(w, strings.Trim(fmt.Sprint(out), "[]"))
 
 }
