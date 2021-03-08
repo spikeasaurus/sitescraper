@@ -64,12 +64,14 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetShortenedUri ...
+// Truncate a URI safety from whatever length to another shorter length
 func (j job) GetShortenedUri(str string, truncateLength int) string {
 	return ShortenText(str, truncateLength)
 	//	// fmt.Fprint((*w), str[:Min(truncateLength, len(str[truncateLength]))], "\n")
 }
 
 // ShortenText ...
+// Truncate a string safety from whatever length to another shorter length
 func ShortenText(str string, truncateLength int) string {
 	return str[:Min(truncateLength, len(str))]
 }
@@ -79,6 +81,7 @@ func bytesToString(data []byte) string {
 	return string(data[:])
 }
 
+// Min ...
 // Min returns the smaller of x or y.
 func Min(x, y int) int {
 	if x < y {
@@ -87,6 +90,7 @@ func Min(x, y int) int {
 	return y
 }
 
+// These are the things the user can POST to us.
 type job struct {
 	Uri               string `json:"uri"`
 	Extension         string `json:"ext"`
@@ -95,14 +99,16 @@ type job struct {
 	ValidDomainsRegex string `json:"validdomains"`
 }
 
+// RecursionDepthInt ...
+// Here is how we convert json:"recursiondepth", a string, to int
 func (j job) RecursionDepthInt() (r int) {
 	r, _ = strconv.Atoi(j.RecursionDepth)
 	return r
 	/// To do: error checking
 }
 
-//
-
+// RecoverGetUrisFromPage ...
+// This is how we avoid our recursion from dying in disgrace
 func RecoverGetUrisFromPage() {
 	if r := recover(); r != nil {
 		// recovered
@@ -122,7 +128,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 			customTransport := http.DefaultTransport.(*http.Transport).Clone()
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-			client := &http.Client{Transport: customTransport, Timeout: 0 * time.Second}
+			client := &http.Client{Transport: customTransport, Timeout: 15 * time.Second}
 
 			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -130,10 +136,10 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			html, err := ioutil.ReadAll(resp.Body)
 
 			// Close
-			resp.Body.Close()
+			defer resp.Body.Close()
 
 			if err := recover(); err != nil {
-				fmt.Println("Error!! ", err)
+				fmt.Fprint((*w), "ERROR\t", err)
 			}
 
 			return html, err
@@ -175,11 +181,13 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			}
 
 		}
-
+		// Take everything we've found this invocation, including the duplicates, and append it to the master list
+		// We are okay with the duplicates because we check for duplicates using the hash table (though in the
+		// future, we'll add extra features to reduce wait times)
 		*uriList = append(*uriList, foundThisInvocation...)
 
 	} else {
-		// reset
+		// Reached the end of depth; reset the remainingDepth back to the max amount for the next "root node"
 		if DEBUG == true {
 			fmt.Fprint((*w), "\nDEBUG\t---Reached end of max depth (", remainingDepth, ")")
 		}
