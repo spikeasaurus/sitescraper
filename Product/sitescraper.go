@@ -154,6 +154,11 @@ func RecoverGetUrisFromPage() {
 // uriList *[]string is a growing list of URIs
 func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked *map[string]bool) {
 
+	if DEBUG == true {
+		fmt.Fprint((*w), "\nDEBUG\tRemaining Depth: ", remainingDepth)
+		fmt.Fprint((*w), "\nDEBUG\tMaximum Depth: ", maxDepth)
+	}
+
 	if remainingDepth > 0 {
 
 		// For element-n, issue GET to uri
