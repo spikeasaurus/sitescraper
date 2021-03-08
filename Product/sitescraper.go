@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+// DEBUG ...
 // Debug flag
 const DEBUG = true
 
@@ -47,20 +48,20 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked)
 
 	if DEBUG == true {
-		fmt.Fprint(w, "\nDEBUG\tGenerating list of downloadable files")
+		fmt.Fprint(w, "\nDEBUG\t---Generating list of downloadable files: ", len(l), " collected")
 	}
 	// out is the variable for keeping track of which of the URIs from l we actually want to keep
 	out := []string{}
 	for n, listItem := range l {
 		if DEBUG == true {
-			fmt.Fprint(w, "\nDEBUG\t---Examining item ", n, ": ", listItem)
+			fmt.Fprint(w, "\nDEBUG\t------Examining item ", n, ": ", listItem)
 		}
 		length := len(listItem)
 		// URI extensions have 3 or 4 len
 		if listItem[length-3:] == "jpg" || listItem[length-4:] == "jpeg" {
 			out = append(out, listItem)
 			if DEBUG == true {
-				fmt.Fprint(w, "\nDEBUG\t-------Adding to list of downloadable files: ", listItem)
+				fmt.Fprint(w, "\nDEBUG\t----------Adding to list of downloadable files: ", listItem)
 			}
 		}
 	}
@@ -70,7 +71,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	RemoveDuplicates(&w, &out, &finalList, finalCleanup)
 
 	if DEBUG == true {
-		fmt.Fprint(w, "\n\nURIs found:", len(finalList), "\n\n\n\n\n")
+		fmt.Fprint(w, "\nDEBUG\t---URIs found:", len(finalList), "\n\n\n\n\n")
 	}
 
 	// Final output
@@ -203,14 +204,13 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		for n, foundUri := range foundThisInvocation {
 
 			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t---n=", n, ", foundUri=", foundUri)
+				fmt.Fprint((*w), "\nDEBUG\t------n=", n, ", foundUri=", foundUri)
 			}
 			// Did we process this already?
 			if (*alreadyChecked)[foundUri] != true {
 				if DEBUG == true {
-					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", ShortenText(foundUri, 125))
+					fmt.Fprint((*w), "\nDEBUG\t---------foundUri is unique: ", ShortenText(foundUri, 125))
 				}
-				uri = foundUri
 
 				// Recurse deeper
 				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked)
@@ -219,7 +219,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				(*alreadyChecked)[foundUri] = true
 			} else {
 				if DEBUG == true {
-					fmt.Fprint((*w), "\nDEBUG\t------foundUri is not unique: ", ShortenText(foundUri, 125))
+					fmt.Fprint((*w), "\nDEBUG\t---------foundUri is not unique: ", ShortenText(foundUri, 125))
 				}
 			}
 
