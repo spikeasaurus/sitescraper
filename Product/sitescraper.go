@@ -186,7 +186,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		}()
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
-		urlRegexSyntax := `((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)`
+		urlRegexSyntax := `(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?`
 		regex := regexp.MustCompile(urlRegexSyntax)
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
@@ -203,7 +203,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				fmt.Fprint((*w), "\nDEBUG\t---n=", n, ", foundUri=", foundUri)
 			}
 			// Did we process this already?
-			if (*alreadyChecked)[foundUri] == false {
+			if (*alreadyChecked)[foundUri] != true {
 				if DEBUG == true {
 					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", ShortenText(foundUri, 50))
 				}
@@ -231,6 +231,5 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		if DEBUG == true {
 			fmt.Fprint((*w), "\nDEBUG\t---Reached end of max depth (", remainingDepth, ")")
 		}
-		remainingDepth = maxDepth
 	}
 }
