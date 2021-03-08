@@ -149,8 +149,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		for n, foundUri := range foundThisInvocation {
 			// Did we process this already?
 
-			alreadyChecked
-			if (*alreadyChecked)[foundUri] == nil {
+			if (*alreadyChecked)[foundUri] == false {
 				uri = foundThisInvocation[n]
 				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked)
 
