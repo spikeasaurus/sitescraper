@@ -65,11 +65,11 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	RemoveDuplicates(&out, &finalList, alreadyChecked)
 
 	if DEBUG == true {
-		fmt.Fprint(w, "\n\nURIs found:", len(out), "\n\n\n\n\n")
+		fmt.Fprint(w, "\n\nURIs found:", len(finalList), "\n\n\n\n\n")
 	}
 
 	// Final output
-	fmt.Fprint(w, strings.Trim(fmt.Sprint(out), "[]"))
+	fmt.Fprint(w, strings.Trim(fmt.Sprint(finalList), "[]"))
 
 }
 
