@@ -143,23 +143,21 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
 		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
-		//fmt.Fprint((*w), "this invocation 2\n", foundThisInvocation)
-		*uriList = append(*uriList, foundThisInvocation...)
-
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
 		for n, foundUri := range foundThisInvocation {
-			// Did we process this already?
 
+			// Did we process this already?
 			if (*alreadyChecked)[foundUri] == false {
 				uri = foundThisInvocation[n]
 				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked)
 
 				// Switch hash table to indicate this URI has already been checked
 				(*alreadyChecked)[foundUri] = true
-			} else {
-				(*uriList)[n] = ""
 			}
+
 		}
+
+		*uriList = append(*uriList, foundThisInvocation...)
 
 	} else {
 		// reset
