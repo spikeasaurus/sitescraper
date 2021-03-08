@@ -62,7 +62,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// Clean up duplicates
 
 	finalList := []string{}
-	RemoveDuplicates(&out, &finalList, alreadyChecked)
+	RemoveDuplicates(&w, &out, &finalList, alreadyChecked)
 
 	if DEBUG == true {
 		fmt.Fprint(w, "\n\nURIs found:", len(finalList), "\n\n\n\n\n")
@@ -81,11 +81,19 @@ func (j job) GetShortenedUri(str string, truncateLength int) string {
 }
 
 // RemoveDuplicates ....
-func RemoveDuplicates(inStr *[]string, outStr *[]string, hash *map[string]bool) {
+func RemoveDuplicates(w *http.ResponseWriter, inStr *[]string, outStr *[]string, hash *map[string]bool) {
 
 	for _, s := range *inStr {
 		if (*hash)[s] != true {
+			if DEBUG == true {
+				fmt.Fprint((*w), "\nDEBUG\t------Unique: ", s)
+			}
 			*outStr = append((*outStr), s)
+			(*hash)[s] = true
+		} else {
+			if DEBUG == true {
+				fmt.Fprint((*w), "\nDEBUG\t------Duplicate: ", s)
+			}
 		}
 	}
 
