@@ -15,7 +15,7 @@ import (
 )
 
 // Debug flag
-const DEBUG = false
+const DEBUG = true
 
 // Sitescraper ...
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
