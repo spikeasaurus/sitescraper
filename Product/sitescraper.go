@@ -47,7 +47,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// Extensions in map format:
 	exts := new(map[string]bool)
 	*exts = make(map[string]bool)
-	*exts = j.GetExtensions()
+	*exts = j.GetExtensions(&w)
 
 	if DEBUG == true {
 		fmt.Fprint(w, "\nDEBUG\t---Testing Extensions")
@@ -111,8 +111,15 @@ func (j job) GetShortenedUri(str string, truncateLength int) string {
 }
 
 // GetExtensions ...
-func (j job) GetExtensions() (extensions map[string]bool) {
+func (j job) GetExtensions(w *http.ResponseWriter) (extensions map[string]bool) {
+	if DEBUG == true {
+		fmt.Fprint((*w), "\nDEBUG\t---Importing extensions from user input")
+	}
 	for _, ext := range j.Extensions {
+		if DEBUG == true {
+			fmt.Fprint((*w), "\nDEBUG\t---ext = ", ext)
+			fmt.Fprint((*w), "\nDEBUG\t---extensions[ext] = ", extensions[ext])
+		}
 		extensions[ext] = true
 	}
 	return extensions
