@@ -51,13 +51,16 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	}
 	// out is the variable for keeping track of which of the URIs from l we actually want to keep
 	out := []string{}
-	for _, listItem := range l {
+	for n, listItem := range l {
+		if DEBUG == true {
+			fmt.Fprint(w, "\nDEBUG\t---Examining item ", n, ": ", listItem)
+		}
 		length := len(listItem)
 		// URI extensions have 3 or 4 len
 		if listItem[length-3:] == "jpg" || listItem[length-4:] == "jpeg" {
 			out = append(out, listItem)
 			if DEBUG == true {
-				fmt.Fprint(w, "\nDEBUG\t---Adding to list of downloadable files: ", listItem)
+				fmt.Fprint(w, "\nDEBUG\t-------Adding to list of downloadable files: ", listItem)
 			}
 		}
 	}
