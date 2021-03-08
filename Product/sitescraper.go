@@ -83,6 +83,10 @@ func (j job) GetShortenedUri(str string, truncateLength int) string {
 // RemoveDuplicates ....
 func RemoveDuplicates(w *http.ResponseWriter, inStr *[]string, outStr *[]string, hash *map[string]bool) {
 
+	if DEBUG == true {
+		fmt.Fprint((*w), "\nDEBUG\t---inStr: ", len(*inStr))
+	}
+
 	for _, s := range *inStr {
 		if (*hash)[s] != true {
 			if DEBUG == true {
