@@ -47,7 +47,10 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// Extensions in map format:
 	exts := new(map[string]bool)
 	*exts = make(map[string]bool)
-	*exts = j.GetExtensions(&w)
+	// *exts = j.GetExtensions(&w) TO-DO: Add unmarshaller
+	(*exts)["jpg"] = true
+	(*exts)["jpeg"] = true
+	(*exts)["png"] = true
 
 	if DEBUG == true {
 		fmt.Fprint(w, "\nDEBUG\t---Testing Extensions")
@@ -170,11 +173,11 @@ func Min(x, y int) int {
 
 // These are the things the user can POST to us.
 type job struct {
-	Uri               string   `json:"uri"`
-	Extensions        []string `json:"ext"`
-	RecursionDepth    string   `json:"recursiondepth"`
-	MinimumFileSize   string   `json:"minfilesize"`
-	ValidDomainsRegex string   `json:"validdomains"`
+	Uri               string `json:"uri"`
+	Extensions        string `json:"ext"`
+	RecursionDepth    string `json:"recursiondepth"`
+	MinimumFileSize   string `json:"minfilesize"`
+	ValidDomainsRegex string `json:"validdomains"`
 }
 
 // RecursionDepthInt ...
