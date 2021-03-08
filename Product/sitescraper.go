@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const DEBUG = true
+
 // Sitescraper ...
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
@@ -45,12 +47,18 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprint(w, "\n---------------------------------------------------", "\n")
 	// fmt.Fprint(w, "\n Work finished; results:", "\n\n")
 
+	if DEBUG == true {
+		fmt.Fprint(w, "\nDEBUG\tGenerating list of downloadable files")
+	}
 	out := []string{}
 	for _, listItem := range l {
 		// fmt.Fprint(w, "  -  ", j.GetShortenedUri(listItem, 75), "\n")
 		length := len(listItem)
 		if listItem[length-3:] == "jpg" || listItem[length-4:] == "jpeg" {
 			out = append(out, listItem)
+			if DEBUG == true {
+				fmt.Fprint(w, "\nDEBUG\t---Adding to list of downloadable files: ", listItem)
+			}
 		}
 	}
 	fmt.Fprint(w, strings.Trim(fmt.Sprint(out), "[]"))
@@ -116,7 +124,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 			customTransport := http.DefaultTransport.(*http.Transport).Clone()
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-			client := &http.Client{Transport: customTransport, Timeout: 3 * time.Second}
+			client := &http.Client{Transport: customTransport, Timeout: 0 * time.Second}
 
 			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -144,11 +152,23 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
+		if DEBUG == true {
+			fmt.Fprint((*w), "\nDEBUG\tIterating thru URIs found this innovaction")
+		}
 		for n, foundUri := range foundThisInvocation {
 
+			if DEBUG == true {
+				fmt.Fprint((*w), "\nDEBUG\t---n=", n, ", foundUri=", foundUri)
+			}
 			// Did we process this already?
 			if (*alreadyChecked)[foundUri] == false {
-				uri = foundThisInvocation[n]
+				if DEBUG == true {
+					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", foundUri[:50])
+				}
+
+				uri = foundUri
+
+				// Recurse deeper
 				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked)
 
 				// Switch hash table to indicate this URI has already been checked
@@ -161,6 +181,9 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 	} else {
 		// reset
+		if DEBUG == true {
+			fmt.Fprint((*w), "\nDEBUG\t---Reached end of max depth (", remainingDepth, ")")
+		}
 		remainingDepth = maxDepth
 	}
 }
