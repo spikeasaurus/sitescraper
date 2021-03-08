@@ -49,6 +49,15 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	*exts = make(map[string]bool)
 	*exts = j.GetExtensions()
 
+	if DEBUG == true {
+		fmt.Fprint(w, "\nDEBUG\t---Testing Extensions")
+		fmt.Fprint(w, "\nDEBUG\t   +--- jpg: ", (*exts)["jpg"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- jpeg: ", (*exts)["jpeg"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- pdf: ", (*exts)["pdf"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- txt: ", (*exts)["txt"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- png: ", (*exts)["png"], "\n")
+	}
+
 	// Main recursion entry point
 	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked, exts)
 
