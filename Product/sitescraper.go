@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+// Debug flag
 const DEBUG = true
 
 // Sitescraper ...
@@ -33,27 +34,24 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// test output
-	// fmt.Fprint(w, "Url: "+j.Uri+"\nExtension: "+j.Extension+"\nRecursion Depth: "+j.RecursionDepth+"\nMinimum File Size: "+j.MinimumFileSize+"\n\n\n")
-
-	// main recursion loop
+	// List of URIs collected is a slice of strings
 	l := []string{}
+
+	// Map/hastable for tracking whether a URI has already been seen, to avoid visiting the same URI multiple times
 	alreadyChecked := new(map[string]bool)
 	*alreadyChecked = make(map[string]bool)
 
+	// Main recursion entry point
 	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked)
-
-	// Print results
-	// fmt.Fprint(w, "\n---------------------------------------------------", "\n")
-	// fmt.Fprint(w, "\n Work finished; results:", "\n\n")
 
 	if DEBUG == true {
 		fmt.Fprint(w, "\nDEBUG\tGenerating list of downloadable files")
 	}
+	// out is the variable for keeping track of which of the URIs from l we actually want to keep
 	out := []string{}
 	for _, listItem := range l {
-		// fmt.Fprint(w, "  -  ", j.GetShortenedUri(listItem, 75), "\n")
 		length := len(listItem)
+		// URI extensions have 3 or 4 len
 		if listItem[length-3:] == "jpg" || listItem[length-4:] == "jpeg" {
 			out = append(out, listItem)
 			if DEBUG == true {
@@ -163,7 +161,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			// Did we process this already?
 			if (*alreadyChecked)[foundUri] == false {
 				if DEBUG == true {
-					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", foundUri[:50])
+					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", ShortenText(foundUri, 50))
 				}
 
 				uri = foundUri
