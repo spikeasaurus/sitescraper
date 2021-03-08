@@ -15,7 +15,7 @@ import (
 )
 
 // Debug flag
-const DEBUG = false
+const DEBUG = true
 
 // Sitescraper ...
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
@@ -190,7 +190,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
 		if DEBUG == true {
-			fmt.Fprint((*w), "\nDEBUG\tIterating thru URIs found this innovaction")
+			fmt.Fprint((*w), "\nDEBUG\tIterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 		}
 		for n, foundUri := range foundThisInvocation {
 
