@@ -15,7 +15,7 @@ import (
 )
 
 // Debug flag
-const DEBUG = true
+const DEBUG = false
 
 // Sitescraper ...
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +64,11 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	finalList := []string{}
 	RemoveDuplicates(&out, &finalList, alreadyChecked)
 
-	fmt.Fprint(w, "\n\nURIs found:", len(out), "\n\n\n\n\n")
+	if DEBUG == true {
+		fmt.Fprint(w, "\n\nURIs found:", len(out), "\n\n\n\n\n")
+	}
+
+	// Final output
 	fmt.Fprint(w, strings.Trim(fmt.Sprint(out), "[]"))
 
 }
