@@ -36,9 +36,9 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// main recursion loop
 	l := []string{}
-	alreadyChecked := map[string]bool{}
+	alreadyChecked := new(map[string]bool)
 
-	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, &alreadyChecked)
+	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked)
 
 	// Print results
 	// fmt.Fprint(w, "\n---------------------------------------------------", "\n")
