@@ -15,7 +15,7 @@ import (
 )
 
 // Debug flag
-const DEBUG = true
+const DEBUG = false
 
 // Sitescraper ...
 func Sitescraper(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +40,8 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// Map/hastable for tracking whether a URI has already been seen, to avoid visiting the same URI multiple times
 	alreadyChecked := new(map[string]bool)
 	*alreadyChecked = make(map[string]bool)
+	finalCleanup := new(map[string]bool)
+	*finalCleanup = make(map[string]bool)
 
 	// Main recursion entry point
 	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked)
@@ -62,7 +64,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// Clean up duplicates
 
 	finalList := []string{}
-	RemoveDuplicates(&w, &out, &finalList, alreadyChecked)
+	RemoveDuplicates(&w, &out, &finalList, finalCleanup)
 
 	if DEBUG == true {
 		fmt.Fprint(w, "\n\nURIs found:", len(finalList), "\n\n\n\n\n")
