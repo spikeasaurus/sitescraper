@@ -156,6 +156,8 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 				// Switch hash table to indicate this URI has already been checked
 				(*alreadyChecked)[foundUri] = true
+			} else {
+				(*uriList)[n] = ""
 			}
 		}
 
