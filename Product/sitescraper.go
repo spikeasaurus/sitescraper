@@ -133,13 +133,13 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		}()
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
-		urlRegexSyntax := `[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)`
+		urlRegexSyntax := `((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)`
 		regex := regexp.MustCompile(urlRegexSyntax)
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
 		fmt.Fprint((*w), "this invocation 1\n", foundThisInvocation)
 
-		regex2 := regexp.MustCompile(`[^\s]*(` + (*validDomainsRegex) + `)[^\s]*`)
+		regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
 		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
 		fmt.Fprint((*w), "this invocation 2\n", foundThisInvocation)
