@@ -121,9 +121,9 @@ func (j job) GetExtensions(w *http.ResponseWriter) (extensions map[string]bool) 
 	for _, ext := range j.Extensions {
 		if DEBUG == true {
 			fmt.Fprint((*w), "\nDEBUG\t---ext = ", ext)
-			fmt.Fprint((*w), "\nDEBUG\t---extensions[ext] = ", extensions[ext])
+			//	fmt.Fprint((*w), "\nDEBUG\t---extensions[ext] = ", extensions[ext])
 		}
-		extensions[ext] = true
+		//extensions[ext] = true
 	}
 	return extensions
 }
