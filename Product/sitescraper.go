@@ -205,7 +205,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			// Did we process this already?
 			if (*alreadyChecked)[foundUri] != true {
 				if DEBUG == true {
-					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", ShortenText(foundUri, 50))
+					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", ShortenText(foundUri, 125))
 				}
 				uri = foundUri
 
@@ -216,7 +216,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				(*alreadyChecked)[foundUri] = true
 			} else {
 				if DEBUG == true {
-					fmt.Fprint((*w), "\nDEBUG\t------foundUri is not unique: ", ShortenText(foundUri, 50))
+					fmt.Fprint((*w), "\nDEBUG\t------foundUri is not unique: ", ShortenText(foundUri, 125))
 				}
 			}
 
