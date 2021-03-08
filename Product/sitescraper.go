@@ -144,8 +144,6 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		regex := regexp.MustCompile(urlRegexSyntax)
 		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
-		//fmt.Fprint((*w), "this invocation 1\n", foundThisInvocation)
-
 		regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
 		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
@@ -163,7 +161,6 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				if DEBUG == true {
 					fmt.Fprint((*w), "\nDEBUG\t------foundUri is unique: ", ShortenText(foundUri, 50))
 				}
-
 				uri = foundUri
 
 				// Recurse deeper
@@ -171,6 +168,10 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 				// Switch hash table to indicate this URI has already been checked
 				(*alreadyChecked)[foundUri] = true
+			} else {
+				if DEBUG == true {
+					fmt.Fprint((*w), "\nDEBUG\t------foundUri is not unique: ", ShortenText(foundUri, 50))
+				}
 			}
 
 		}
