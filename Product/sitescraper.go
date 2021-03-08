@@ -84,7 +84,7 @@ func (j job) GetShortenedUri(str string, truncateLength int) string {
 func RemoveDuplicates(inStr *[]string, outStr *[]string, hash *map[string]bool) {
 
 	for _, s := range *inStr {
-		if (*hash)[s] == false {
+		if (*hash)[s] != true {
 			*outStr = append((*outStr), s)
 		}
 	}
