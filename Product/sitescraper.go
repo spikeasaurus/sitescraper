@@ -217,28 +217,28 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 	//	if remainingDepth >= 0 {
 
 	// For element-n, issue GET to uri
-	html, _ := func() ([]byte, error) {
+	//html, _ := func() ([]byte, error) {
 
-		defer RecoverGetUrisFromPage()
+	defer RecoverGetUrisFromPage()
 
-		customTransport := http.DefaultTransport.(*http.Transport).Clone()
-		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		client := &http.Client{Transport: customTransport, Timeout: 15 * time.Second}
+	customTransport := http.DefaultTransport.(*http.Transport).Clone()
+	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	client := &http.Client{Transport: customTransport, Timeout: 15 * time.Second}
 
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-		resp, err := client.Get(uri)
-		html, err := ioutil.ReadAll(resp.Body)
+	resp, _ := client.Get(uri)
+	html, _ := ioutil.ReadAll(resp.Body)
 
-		// Close
-		defer resp.Body.Close()
+	// Close
+	defer resp.Body.Close()
 
-		if err := recover(); err != nil {
-			fmt.Fprint((*w), "\nERROR\t------", err)
-		}
+	if err := recover(); err != nil {
+		fmt.Fprint((*w), "\nERROR\t------", err)
+	}
 
-		return html, err
-	}()
+	//	return html, err
+	//}()
 
 	// Use REGEX to search HTML BODY for URIs, and append them to uriList
 	htmlStr := bytesToString(html)
@@ -264,8 +264,14 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				fmt.Fprint((*w), "\nDEBUG\t---------foundUri is unique: ", ShortenText(foundUri, 125))
 			}
 			*uriList = append(*uriList, foundUri)
+			if DEBUG == true {
+				fmt.Fprint((*w), "\nDEBUG\t---------uriList: ", *uriList)
+			}
 
 			// Recurse deeper
+			if DEBUG == true {
+				fmt.Fprint((*w), "\nDEBUG\t---------Remaining Depth: ", remainingDepth)
+			}
 			if remainingDepth > 0 {
 				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked, extensions)
 			}
