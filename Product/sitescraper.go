@@ -52,12 +52,12 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	exts["jpeg"] = true
 	exts["png"] = true
 
-	j.Debug(&w, 2, "\nDEBUG\t---Testing Extensions")
-	j.Debug(&w, 2, "\nDEBUG\t   +--- jpg: ", exts["jpg"])
-	j.Debug(&w, 2, "\nDEBUG\t   +--- jpeg: ", exts["jpeg"])
-	j.Debug(&w, 2, "\nDEBUG\t   +--- pdf: ", exts["pdf"])
-	j.Debug(&w, 2, "\nDEBUG\t   +--- txt: ", exts["txt"])
-	j.Debug(&w, 2, "\nDEBUG\t   +--- png: ", exts["png"], "\n")
+	j.Debug(&w, 2, "Testing Extensions")
+	j.Debug(&w, 3, "jpg: ", exts["jpg"])
+	j.Debug(&w, 3, "jpeg: ", exts["jpeg"])
+	j.Debug(&w, 3, "pdf: ", exts["pdf"])
+	j.Debug(&w, 3, "txt: ", exts["txt"])
+	j.Debug(&w, 3, "png: ", exts["png"], "\n")
 
 	// Main recursion entry point
 	j.GetURIsFromPage(j.URI, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked, exts)
@@ -211,7 +211,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
 	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	client := &http.Client{Transport: customTransport, Timeout: 15 * time.Second}
+	client := &http.Client{Transport: customTransport, Timeout: 0 * time.Second}
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
