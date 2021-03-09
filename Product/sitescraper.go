@@ -234,7 +234,9 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 	regex := regexp.MustCompile(urlRegexSyntax)
 	foundThisInvocation := regex.FindAllString(htmlStr, -1)
 	regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
+	j.Debug(w, 2, "Applying regex, uri: ", foundThisInvocation, ")")
 	foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
+	j.Debug(w, 2, "Applying regex, domain name: ", foundThisInvocation, ")")
 
 	// For each of the Urls we read, do the same thing (recurse), and dive deeper
 	j.Debug(w, 1, "htmlStr = ", htmlStr, ")")
