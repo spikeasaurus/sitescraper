@@ -214,77 +214,76 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 		fmt.Fprint((*w), "\nDEBUG---\tMaximum Depth: ", maxDepth)
 	}
 
-	if remainingDepth > 0 {
+	//	if remainingDepth >= 0 {
 
-		// For element-n, issue GET to uri
-		html, _ := func() ([]byte, error) {
+	// For element-n, issue GET to uri
+	html, _ := func() ([]byte, error) {
 
-			defer RecoverGetUrisFromPage()
+		defer RecoverGetUrisFromPage()
 
-			customTransport := http.DefaultTransport.(*http.Transport).Clone()
-			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-			client := &http.Client{Transport: customTransport, Timeout: 15 * time.Second}
+		customTransport := http.DefaultTransport.(*http.Transport).Clone()
+		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		client := &http.Client{Transport: customTransport, Timeout: 15 * time.Second}
 
-			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-			resp, err := client.Get(uri)
-			html, err := ioutil.ReadAll(resp.Body)
+		resp, err := client.Get(uri)
+		html, err := ioutil.ReadAll(resp.Body)
 
-			// Close
-			defer resp.Body.Close()
+		// Close
+		defer resp.Body.Close()
 
-			if err := recover(); err != nil {
-				fmt.Fprint((*w), "\nERROR\t------", err)
-			}
-
-			return html, err
-		}()
-
-		// Use REGEX to search HTML BODY for URIs, and append them to uriList
-		htmlStr := bytesToString(html)
-		urlRegexSyntax := `(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?`
-		regex := regexp.MustCompile(urlRegexSyntax)
-		foundThisInvocation := regex.FindAllString(htmlStr, -1)
-		regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
-		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
-
-		// For each of the Urls we read, do the same thing (recurse), and dive deeper
-		if DEBUG == true {
-			fmt.Fprint((*w), "\nDEBUG\t------htmlStr = ", htmlStr, ")")
-			fmt.Fprint((*w), "\nDEBUG\t------Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
+		if err := recover(); err != nil {
+			fmt.Fprint((*w), "\nERROR\t------", err)
 		}
-		for n, foundUri := range foundThisInvocation {
 
-			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t------n=", n, ", foundUri=", foundUri)
-			}
-			// Did we process this already?
-			if alreadyChecked[foundUri] != true {
-				if DEBUG == true {
-					fmt.Fprint((*w), "\nDEBUG\t---------foundUri is unique: ", ShortenText(foundUri, 125))
-				}
+		return html, err
+	}()
 
-				// Recurse deeper
-				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked, extensions)
+	// Use REGEX to search HTML BODY for URIs, and append them to uriList
+	htmlStr := bytesToString(html)
+	urlRegexSyntax := `(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?`
+	regex := regexp.MustCompile(urlRegexSyntax)
+	foundThisInvocation := regex.FindAllString(htmlStr, -1)
+	regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
+	foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
-				// Switch hash table to indicate this URI has already been checked
-				alreadyChecked[foundUri] = true
-			} else {
-				if DEBUG == true {
-					fmt.Fprint((*w), "\nDEBUG\t---------foundUri is not unique: ", ShortenText(foundUri, 125))
-				}
-			}
-
-		}
-		// Take everything we've found this invocation, including the duplicates, and append it to the master list
-		// We are okay with the duplicates because we check for duplicates using the hash table (though in the
-		// future, we'll add extra features to reduce wait times)
-		*uriList = append(*uriList, foundThisInvocation...)
-
-	} else {
-		// Reached the end of depth; reset the remainingDepth back to the max amount for the next "root node"
-		if DEBUG == true {
-			fmt.Fprint((*w), "\nDEBUG\t---Reached end of max depth (", remainingDepth, ")")
-		}
+	// For each of the Urls we read, do the same thing (recurse), and dive deeper
+	if DEBUG == true {
+		fmt.Fprint((*w), "\nDEBUG\t------htmlStr = ", htmlStr, ")")
+		fmt.Fprint((*w), "\nDEBUG\t------Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 	}
+	for n, foundUri := range foundThisInvocation {
+
+		if DEBUG == true {
+			fmt.Fprint((*w), "\nDEBUG\t------n=", n, ", foundUri=", foundUri)
+		}
+		// Did we process this already?
+		if alreadyChecked[foundUri] != true {
+			if DEBUG == true {
+				fmt.Fprint((*w), "\nDEBUG\t---------foundUri is unique: ", ShortenText(foundUri, 125))
+			}
+
+			// Recurse deeper
+			if remainingDepth > 0 {
+				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked, extensions)
+			}
+			// Switch hash table to indicate this URI has already been checked
+			alreadyChecked[foundUri] = true
+		} else {
+			if DEBUG == true {
+				fmt.Fprint((*w), "\nDEBUG\t---------foundUri is not unique: ", ShortenText(foundUri, 125))
+			}
+		}
+
+	}
+	// Take everything we've found this invocation, including the duplicates, and append it to the master list
+	// We are okay with the duplicates because we check for duplicates using the hash table (though in the
+	// future, we'll add extra features to reduce wait times)
+	*uriList = append(*uriList, foundThisInvocation...)
+
+	// Reached the end of depth; reset the remainingDepth back to the max amount for the next "root node"
+	//if DEBUG == true {
+	//		fmt.Fprint((*w), "\nDEBUG\t---Reached end of max depth (", remainingDepth, ")")
+	//	}
 }
