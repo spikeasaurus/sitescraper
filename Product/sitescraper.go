@@ -256,9 +256,10 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 			// Recurse deeper
 			if remainingDepth > 0 {
 				j.GetURIsFromPage(foundURI, w, remainingDepth-1, maxDepth, URIList, validDomainsRegex, alreadyChecked, extensions)
+
+				// Switch hash table to indicate this URI has already been checked
+				alreadyChecked[foundURI] = true
 			}
-			// Switch hash table to indicate this URI has already been checked
-			alreadyChecked[foundURI] = true
 		} else {
 			j.Debug(w, 3, "foundURI is not unique: ", ShortenText(foundURI, 125))
 		}
