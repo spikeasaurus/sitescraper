@@ -76,7 +76,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		}
 		// URI extensions have 3 or 4 len
 
-		if MatchesExtension(listItem, exts) {
+		if MatchesExtension(&w, listItem, exts) {
 			if DEBUG == true {
 				fmt.Fprint(w, "\nDEBUG\t----------Adding ", listItem, " to ", out)
 			}
@@ -99,7 +99,11 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 // MatchesExtension ...
 // TO DO: A better way to check for too short file names
-func MatchesExtension(str string, ext map[string]bool) bool {
+func MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) bool {
+	if DEBUG == true {
+		fmt.Fprint(*w, "\nDEBUG\t-------str = ", str)
+		fmt.Fprint(*w, "\nDEBUG\t-------ext = ", ext)
+	}
 	// The shortest possible file name is something like A.jpg; anything shorter, and idk.
 	if len(str) < 6 {
 		return false
