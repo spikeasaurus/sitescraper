@@ -107,8 +107,11 @@ func MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) b
 	// The shortest possible file name is something like A.jpg; anything shorter, and idk.
 	if len(str) < 6 {
 		return false
+	} else if ext[str[len(str)-3:]] == true || ext[str[len(str)-4:]] == true {
+		return true
+	} else {
+		return false
 	}
-	return (ext)[str]
 }
 
 // GetShortenedUri ...
