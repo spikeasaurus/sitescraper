@@ -83,8 +83,8 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// Final output
 	///j.Debug(&w, 1, strings.Trim(fmt.Sprint(finalList), "[]"))
-	j.Debug(&w, 0, finalList)
-
+	//j.Debug(&w, 0, finalList)
+	fmt.Fprint(w, finalList)
 }
 
 // Debug ...
@@ -230,7 +230,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	// Use REGEX to search HTML BODY for URIs, and append them to URIList
 	htmlStr := bytesToString(html)
-	urlRegexSyntax := `(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?`
+	urlRegexSyntax := `((http:\/\/)|(https:\/\/))?\S*(\.\w\w*)\S*[\w]`
 	regex := regexp.MustCompile(urlRegexSyntax)
 	foundThisInvocation := regex.FindAllString(htmlStr, -1)
 	regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
