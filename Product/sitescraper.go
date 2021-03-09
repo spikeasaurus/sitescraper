@@ -82,10 +82,11 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// Clean up duplicates
 	finalList := []string{}
 	RemoveDuplicates(&w, &out, &finalList, finalCleanup)
-	j.Debug(&w, 1, "URIs found:", fmt.Sprint(len(finalList)), "\n\n\n\n\n")
+	j.Debug(&w, 1, "URIs found:", len(finalList))
 
 	// Final output
-	j.Debug(&w, 1, strings.Trim(fmt.Sprint(finalList), "[]"))
+	///j.Debug(&w, 1, strings.Trim(fmt.Sprint(finalList), "[]"))
+	j.Debug(&w, 1, finalList)
 
 }
 
@@ -96,7 +97,7 @@ func (j job) Debug(w *http.ResponseWriter, debugLevel int, str ...interface{}) {
 		return
 	}
 	if debugLevelRequested >= debugLevel {
-		fmt.Fprint(*w, "\nDEBUG\t", strings.Repeat("---", debugLevel), str)
+		fmt.Fprint(*w, "\nDEBUG\t", strings.Repeat("---", debugLevel), strings.Trim(fmt.Sprint(str...), "[]"))
 	}
 }
 
