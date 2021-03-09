@@ -263,6 +263,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			if DEBUG == true {
 				fmt.Fprint((*w), "\nDEBUG\t---------foundUri is unique: ", ShortenText(foundUri, 125))
 			}
+			*uriList = append(*uriList, foundUri)
 
 			// Recurse deeper
 			if remainingDepth > 0 {
@@ -275,15 +276,5 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				fmt.Fprint((*w), "\nDEBUG\t---------foundUri is not unique: ", ShortenText(foundUri, 125))
 			}
 		}
-
 	}
-	// Take everything we've found this invocation, including the duplicates, and append it to the master list
-	// We are okay with the duplicates because we check for duplicates using the hash table (though in the
-	// future, we'll add extra features to reduce wait times)
-	*uriList = append(*uriList, foundThisInvocation...)
-
-	// Reached the end of depth; reset the remainingDepth back to the max amount for the next "root node"
-	//if DEBUG == true {
-	//		fmt.Fprint((*w), "\nDEBUG\t---Reached end of max depth (", remainingDepth, ")")
-	//	}
 }
