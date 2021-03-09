@@ -83,7 +83,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// Final output
 	///j.Debug(&w, 1, strings.Trim(fmt.Sprint(finalList), "[]"))
-	j.Debug(&w, 1, finalList)
+	j.Debug(&w, 0, finalList)
 
 }
 
