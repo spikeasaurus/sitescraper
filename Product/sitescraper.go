@@ -209,8 +209,8 @@ func RecoverGetUrisFromPage() {
 func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked map[string]bool, extensions map[string]bool) {
 
 	if DEBUG == true {
-		fmt.Fprint((*w), "\nDEBUG\tRemaining Depth: ", remainingDepth)
-		fmt.Fprint((*w), "\nDEBUG\tMaximum Depth: ", maxDepth)
+		fmt.Fprint((*w), "\nDEBUG---\tRemaining Depth: ", remainingDepth)
+		fmt.Fprint((*w), "\nDEBUG---\tMaximum Depth: ", maxDepth)
 	}
 
 	if remainingDepth > 0 {
@@ -233,23 +233,24 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			defer resp.Body.Close()
 
 			if err := recover(); err != nil {
-				fmt.Fprint((*w), "ERROR\t", err)
+				fmt.Fprint((*w), "\nERROR\t------", err)
 			}
 
 			return html, err
 		}()
 
 		// Use REGEX to search HTML BODY for URIs, and append them to uriList
+		htmlStr := bytesToString(html)
 		urlRegexSyntax := `(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?`
 		regex := regexp.MustCompile(urlRegexSyntax)
-		htmlStr := bytesToString(html)
 		foundThisInvocation := regex.FindAllString(htmlStr, -1)
 		regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
 		foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
 		// For each of the Urls we read, do the same thing (recurse), and dive deeper
 		if DEBUG == true {
-			fmt.Fprint((*w), "\nDEBUG\tIterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
+			fmt.Fprint((*w), "\nDEBUG\t------htmlStr = ", htmlStr, ")")
+			fmt.Fprint((*w), "\nDEBUG\t------Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 		}
 		for n, foundUri := range foundThisInvocation {
 
