@@ -26,7 +26,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&j); err != nil {
 		switch err {
 		case io.EOF:
-			// fmt.Fprint(w, "EOF")
+			// j.Debug(w, "EOF")
 			return
 		default:
 			log.Printf("json.NewDecoder: %v", err)
@@ -52,28 +52,25 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	exts["jpeg"] = true
 	exts["png"] = true
 
-	if DEBUG == true {
-		fmt.Fprint(w, "\nDEBUG\t---Testing Extensions")
-		fmt.Fprint(w, "\nDEBUG\t   +--- jpg: ", exts["jpg"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- jpeg: ", exts["jpeg"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- pdf: ", exts["pdf"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- txt: ", exts["txt"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- png: ", exts["png"], "\n")
-	}
+	j.Debug(&w, 2, "\nDEBUG\t---Testing Extensions")
+	j.Debug(&w, 2, "\nDEBUG\t   +--- jpg: ", exts["jpg"])
+	j.Debug(&w, 2, "\nDEBUG\t   +--- jpeg: ", exts["jpeg"])
+	j.Debug(&w, 2, "\nDEBUG\t   +--- pdf: ", exts["pdf"])
+	j.Debug(&w, 2, "\nDEBUG\t   +--- txt: ", exts["txt"])
+	j.Debug(&w, 2, "\nDEBUG\t   +--- png: ", exts["png"], "\n")
 
 	// Main recursion entry point
-	GetUrisFromPage(j.Uri, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked, exts)
+	j.GetURIsFromPage(j.URI, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked, exts)
 
-	if DEBUG == true {
-		fmt.Fprint(w, "\nDEBUG\t---Generating list of downloadable files: ", len(l), " collected")
-	}
+	j.Debug(&w, 1, "\nDEBUG\t---Generating list of downloadable files: ", len(l), " collected")
+
 	// out is the variable for keeping track of which of the URIs from l we actually want to keep
 	out := []string{}
 
 	for n, listItem := range l {
 		j.Debug(&w, 2, "Examining item ", fmt.Sprint(n), ": ", listItem)
 
-		if MatchesExtension(&w, listItem, exts) {
+		if j.MatchesExtension(&w, listItem, exts) {
 			j.Debug(&w, 3, "Adding ", listItem, " to ", out)
 			out = append(out, listItem)
 		}
@@ -81,7 +78,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 	// Clean up duplicates
 	finalList := []string{}
-	RemoveDuplicates(&w, &out, &finalList, finalCleanup)
+	j.RemoveDuplicates(&w, &out, &finalList, finalCleanup)
 	j.Debug(&w, 1, "URIs found:", len(finalList))
 
 	// Final output
@@ -90,24 +87,23 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Debug
+// Debug ...
 func (j job) Debug(w *http.ResponseWriter, debugLevel int, str ...interface{}) {
 	debugLevelRequested, err := strconv.Atoi(j.DebugLevel)
 	if err != nil {
 		return
 	}
 	if debugLevelRequested >= debugLevel {
-		fmt.Fprint(*w, "\nDEBUG\t", strings.Repeat("---", debugLevel), strings.Trim(fmt.Sprint(str...), "[]"))
+		fmt.Fprint((*w), "\nDEBUG\t", strings.Repeat("---", debugLevel), strings.Trim(fmt.Sprint(str...), "[]"))
 	}
 }
 
 // MatchesExtension ...
 // TO DO: A better way to check for too short file names
-func MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) bool {
-	if DEBUG == true {
-		fmt.Fprint(*w, "\nDEBUG\t-------str = ", str)
-		fmt.Fprint(*w, "\nDEBUG\t-------ext = ", ext)
-	}
+func (j job) MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) bool {
+	j.Debug(w, 1, "str = ", str)
+	j.Debug(w, 1, "ext = ", ext)
+
 	// The shortest possible file name is something like A.jpg; anything shorter, and idk.
 	if len(str) < 6 {
 		return false
@@ -118,46 +114,35 @@ func MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) b
 	}
 }
 
-// GetShortenedUri ...
+// GetShortenedURI ...
 // Truncate a URI safety from whatever length to another shorter length
-func (j job) GetShortenedUri(str string, truncateLength int) string {
+func (j job) GetShortenedURI(str string, truncateLength int) string {
 	return ShortenText(str, truncateLength)
-	//	// fmt.Fprint((*w), str[:Min(truncateLength, len(str[truncateLength]))], "\n")
+	//	// j.Debug((*w), str[:Min(truncateLength, len(str[truncateLength]))], "\n")
 }
 
 // GetExtensions ...
 func (j job) GetExtensions(w *http.ResponseWriter) (extensions map[string]bool) {
-	if DEBUG == true {
-		fmt.Fprint((*w), "\nDEBUG\t---Importing extensions from user input")
-	}
+	j.Debug(w, 2, "Importing extensions from user input")
+
 	for _, ext := range j.Extensions {
-		if DEBUG == true {
-			fmt.Fprint((*w), "\nDEBUG\t---ext = ", ext)
-			//	fmt.Fprint((*w), "\nDEBUG\t---extensions[ext] = ", extensions[ext])
-		}
-		//extensions[ext] = true
+		j.Debug(w, 2, "ext = ", ext)
 	}
 	return extensions
 }
 
 // RemoveDuplicates ....
-func RemoveDuplicates(w *http.ResponseWriter, inStr *[]string, outStr *[]string, hash map[string]bool) {
+func (j job) RemoveDuplicates(w *http.ResponseWriter, inStr *[]string, outStr *[]string, hash map[string]bool) {
 
-	if DEBUG == true {
-		fmt.Fprint((*w), "\nDEBUG\t---inStr: ", len(*inStr))
-	}
+	j.Debug(w, 1, "inStr: ", len(*inStr))
 
 	for _, s := range *inStr {
 		if hash[s] != true {
-			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t------Unique: ", s)
-			}
+			j.Debug(w, 3, "Unique: ", s)
 			*outStr = append((*outStr), s)
 			hash[s] = true
 		} else {
-			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t------Duplicate: ", s)
-			}
+			j.Debug(w, 3, "Duplicate: ", s)
 		}
 	}
 
@@ -185,7 +170,7 @@ func Min(x, y int) int {
 
 // These are the things the user can POST to us.
 type job struct {
-	Uri               string `json:"uri"`
+	URI               string `json:"uri"`
 	Extensions        string `json:"ext"`
 	RecursionDepth    string `json:"recursiondepth"`
 	MinimumFileSize   string `json:"minfilesize"`
@@ -201,30 +186,28 @@ func (j job) RecursionDepthInt() (r int) {
 	/// To do: error checking
 }
 
-// RecoverGetUrisFromPage ...
+// RecoverGetURIsFromPage ...
 // This is how we avoid our recursion from dying in disgrace
-func RecoverGetUrisFromPage() {
+func RecoverGetURIsFromPage() {
 	if r := recover(); r != nil {
 		// recovered
 	}
 }
 
-// GetUrisFromPage ...
-// uriList *[]string is a growing list of URIs
-func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked map[string]bool, extensions map[string]bool) {
+// GetURIsFromPage ...
+// URIList *[]string is a growing list of URIs
+func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth int, maxDepth int, URIList *[]string, validDomainsRegex *string, alreadyChecked map[string]bool, extensions map[string]bool) {
 
-	if DEBUG == true {
-		fmt.Fprint((*w), "\nDEBUG---\tCurrent URI: ", uri)
-		fmt.Fprint((*w), "\nDEBUG---\tRemaining Depth: ", remainingDepth)
-		fmt.Fprint((*w), "\nDEBUG---\tMaximum Depth: ", maxDepth)
-	}
+	j.Debug(w, 1, "Current URI: ", URI)
+	j.Debug(w, 1, "Remaining Depth: ", remainingDepth)
+	j.Debug(w, 1, "Maximum Depth: ", maxDepth)
 
 	//	if remainingDepth >= 0 {
 
-	// For element-n, issue GET to uri
+	// For element-n, issue GET to URI
 	//html, _ := func() ([]byte, error) {
 
-	defer RecoverGetUrisFromPage()
+	defer RecoverGetURIsFromPage()
 
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
 	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -232,20 +215,20 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	resp, _ := client.Get(uri)
+	resp, _ := client.Get(URI)
 	html, _ := ioutil.ReadAll(resp.Body)
 
 	// Close
 	defer resp.Body.Close()
 
 	if err := recover(); err != nil {
-		fmt.Fprint((*w), "\nERROR\t------", err)
+		//	j.Debug((*w), "\nERROR\t------", err)
 	}
 
 	//	return html, err
 	//}()
 
-	// Use REGEX to search HTML BODY for URIs, and append them to uriList
+	// Use REGEX to search HTML BODY for URIs, and append them to URIList
 	htmlStr := bytesToString(html)
 	urlRegexSyntax := `(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?`
 	regex := regexp.MustCompile(urlRegexSyntax)
@@ -254,35 +237,28 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 	foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
 
 	// For each of the Urls we read, do the same thing (recurse), and dive deeper
-	if DEBUG == true {
-		fmt.Fprint((*w), "\nDEBUG\t------htmlStr = ", htmlStr, ")")
-		fmt.Fprint((*w), "\nDEBUG\t------Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
-	}
-	for n, foundUri := range foundThisInvocation {
+	j.Debug(w, 1, "htmlStr = ", htmlStr, ")")
+	j.Debug(w, 1, "Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 
-		if DEBUG == true {
-			fmt.Fprint((*w), "\nDEBUG\t------n=", n, ", remaining depth= ", remainingDepth, ", foundUri=", foundUri)
-		}
+	for n, foundURI := range foundThisInvocation {
+
+		j.Debug(w, 2, "n=", n, ", remaining depth= ", remainingDepth, ", foundURI=", foundURI)
+
 		// Did we process this already?
-		if alreadyChecked[foundUri] != true {
-			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t---------foundUri is unique: ", ShortenText(foundUri, 125))
-			}
-			*uriList = append(*uriList, foundUri)
-			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t---------uriList: ", *uriList)
-			}
+		if alreadyChecked[foundURI] != true {
+			j.Debug(w, 3, "foundURI is unique: ", ShortenText(foundURI, 125))
+
+			*URIList = append(*URIList, foundURI)
+			j.Debug(w, 3, "URIList: ", *URIList)
 
 			// Recurse deeper
 			if remainingDepth > 0 {
-				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked, extensions)
+				j.GetURIsFromPage(foundURI, w, remainingDepth-1, maxDepth, URIList, validDomainsRegex, alreadyChecked, extensions)
 			}
 			// Switch hash table to indicate this URI has already been checked
-			alreadyChecked[foundUri] = true
+			alreadyChecked[foundURI] = true
 		} else {
-			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t---------foundUri is not unique: ", ShortenText(foundUri, 125))
-			}
+			j.Debug(w, 3, "foundURI is not unique: ", ShortenText(foundURI, 125))
 		}
 	}
 }
