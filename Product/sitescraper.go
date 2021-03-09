@@ -39,26 +39,26 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	l := []string{}
 
 	// Map/hastable for tracking whether a URI has already been seen, to avoid visiting the same URI multiple times
-	alreadyChecked := new(map[string]bool)
-	*alreadyChecked = make(map[string]bool)
-	finalCleanup := new(map[string]bool)
-	*finalCleanup = make(map[string]bool)
+	alreadyChecked := *new(map[string]bool)
+	alreadyChecked = make(map[string]bool)
+	finalCleanup := *new(map[string]bool)
+	finalCleanup = make(map[string]bool)
 
 	// Extensions in map format:
-	exts := new(map[string]bool)
-	*exts = make(map[string]bool)
+	exts := *new(map[string]bool)
+	exts = make(map[string]bool)
 	// *exts = j.GetExtensions(&w) TO-DO: Add unmarshaller
-	(*exts)["jpg"] = true
-	(*exts)["jpeg"] = true
-	(*exts)["png"] = true
+	exts["jpg"] = true
+	exts["jpeg"] = true
+	exts["png"] = true
 
 	if DEBUG == true {
 		fmt.Fprint(w, "\nDEBUG\t---Testing Extensions")
-		fmt.Fprint(w, "\nDEBUG\t   +--- jpg: ", (*exts)["jpg"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- jpeg: ", (*exts)["jpeg"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- pdf: ", (*exts)["pdf"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- txt: ", (*exts)["txt"])
-		fmt.Fprint(w, "\nDEBUG\t   +--- png: ", (*exts)["png"], "\n")
+		fmt.Fprint(w, "\nDEBUG\t   +--- jpg: ", exts["jpg"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- jpeg: ", exts["jpeg"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- pdf: ", exts["pdf"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- txt: ", exts["txt"])
+		fmt.Fprint(w, "\nDEBUG\t   +--- png: ", exts["png"], "\n")
 	}
 
 	// Main recursion entry point
@@ -75,6 +75,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "\nDEBUG\t------Examining item ", n, ": ", listItem)
 		}
 		// URI extensions have 3 or 4 len
+
 		if MatchesExtension(listItem, exts) {
 			if DEBUG == true {
 				fmt.Fprint(w, "\nDEBUG\t----------Adding ", listItem, " to ", out)
@@ -98,12 +99,12 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 
 // MatchesExtension ...
 // TO DO: A better way to check for too short file names
-func MatchesExtension(str string, ext *map[string]bool) bool {
+func MatchesExtension(str string, ext map[string]bool) bool {
 	// The shortest possible file name is something like A.jpg; anything shorter, and idk.
 	if len(str) < 6 {
 		return false
 	}
-	return (*ext)[str]
+	return (ext)[str]
 }
 
 // GetShortenedUri ...
@@ -129,19 +130,19 @@ func (j job) GetExtensions(w *http.ResponseWriter) (extensions map[string]bool) 
 }
 
 // RemoveDuplicates ....
-func RemoveDuplicates(w *http.ResponseWriter, inStr *[]string, outStr *[]string, hash *map[string]bool) {
+func RemoveDuplicates(w *http.ResponseWriter, inStr *[]string, outStr *[]string, hash map[string]bool) {
 
 	if DEBUG == true {
 		fmt.Fprint((*w), "\nDEBUG\t---inStr: ", len(*inStr))
 	}
 
 	for _, s := range *inStr {
-		if (*hash)[s] != true {
+		if hash[s] != true {
 			if DEBUG == true {
 				fmt.Fprint((*w), "\nDEBUG\t------Unique: ", s)
 			}
 			*outStr = append((*outStr), s)
-			(*hash)[s] = true
+			hash[s] = true
 		} else {
 			if DEBUG == true {
 				fmt.Fprint((*w), "\nDEBUG\t------Duplicate: ", s)
@@ -198,7 +199,7 @@ func RecoverGetUrisFromPage() {
 
 // GetUrisFromPage ...
 // uriList *[]string is a growing list of URIs
-func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked *map[string]bool, extensions *map[string]bool) {
+func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked map[string]bool, extensions map[string]bool) {
 
 	if DEBUG == true {
 		fmt.Fprint((*w), "\nDEBUG\tRemaining Depth: ", remainingDepth)
@@ -249,7 +250,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				fmt.Fprint((*w), "\nDEBUG\t------n=", n, ", foundUri=", foundUri)
 			}
 			// Did we process this already?
-			if (*alreadyChecked)[foundUri] != true {
+			if alreadyChecked[foundUri] != true {
 				if DEBUG == true {
 					fmt.Fprint((*w), "\nDEBUG\t---------foundUri is unique: ", ShortenText(foundUri, 125))
 				}
@@ -258,7 +259,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked, extensions)
 
 				// Switch hash table to indicate this URI has already been checked
-				(*alreadyChecked)[foundUri] = true
+				alreadyChecked[foundUri] = true
 			} else {
 				if DEBUG == true {
 					fmt.Fprint((*w), "\nDEBUG\t---------foundUri is not unique: ", ShortenText(foundUri, 125))
