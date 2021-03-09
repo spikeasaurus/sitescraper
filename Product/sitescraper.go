@@ -71,15 +71,10 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	out := []string{}
 
 	for n, listItem := range l {
-		if DEBUG == true {
-			fmt.Fprint(w, "\nDEBUG\t------Examining item ", n, ": ", listItem)
-		}
-		// URI extensions have 3 or 4 len
+		j.Debug(&w, 2, "Examining item ", fmt.Sprint(n), ": ", listItem)
 
 		if MatchesExtension(&w, listItem, exts) {
-			if DEBUG == true {
-				fmt.Fprint(w, "\nDEBUG\t----------Adding ", listItem, " to ", out)
-			}
+			j.Debug(&w, 3, "Adding ", listItem, " to ", out)
 			out = append(out, listItem)
 		}
 	}
@@ -87,14 +82,22 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	// Clean up duplicates
 	finalList := []string{}
 	RemoveDuplicates(&w, &out, &finalList, finalCleanup)
-
-	if DEBUG == true {
-		fmt.Fprint(w, "\nDEBUG\t---URIs found:", len(finalList), "\n\n\n\n\n")
-	}
+	j.Debug(&w, 1, "URIs found:", fmt.Sprint(len(finalList)), "\n\n\n\n\n")
 
 	// Final output
-	fmt.Fprint(w, strings.Trim(fmt.Sprint(finalList), "[]"))
+	j.Debug(&w, 1, strings.Trim(fmt.Sprint(finalList), "[]"))
 
+}
+
+// Debug
+func (j job) Debug(w *http.ResponseWriter, debugLevel int, str ...interface{}) {
+	debugLevelRequested, err := strconv.Atoi(j.DebugLevel)
+	if err != nil {
+		return
+	}
+	if debugLevelRequested >= debugLevel {
+		fmt.Fprint(*w, "\nDEBUG\t", strings.Repeat("---", debugLevel), str)
+	}
 }
 
 // MatchesExtension ...
@@ -186,6 +189,7 @@ type job struct {
 	RecursionDepth    string `json:"recursiondepth"`
 	MinimumFileSize   string `json:"minfilesize"`
 	ValidDomainsRegex string `json:"validdomains"`
+	DebugLevel        string `json:"debug"`
 }
 
 // RecursionDepthInt ...
@@ -256,7 +260,7 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 	for n, foundUri := range foundThisInvocation {
 
 		if DEBUG == true {
-			fmt.Fprint((*w), "\nDEBUG\t------n=", n, ", foundUri=", foundUri)
+			fmt.Fprint((*w), "\nDEBUG\t------n=", n, ", remaining depth= ", remainingDepth, ", foundUri=", foundUri)
 		}
 		// Did we process this already?
 		if alreadyChecked[foundUri] != true {
@@ -269,9 +273,6 @@ func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, max
 			}
 
 			// Recurse deeper
-			if DEBUG == true {
-				fmt.Fprint((*w), "\nDEBUG\t---------Remaining Depth: ", remainingDepth)
-			}
 			if remainingDepth > 0 {
 				GetUrisFromPage(foundUri, w, remainingDepth-1, maxDepth, uriList, validDomainsRegex, alreadyChecked, extensions)
 			}
