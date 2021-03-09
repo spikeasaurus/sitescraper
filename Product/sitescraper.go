@@ -209,6 +209,7 @@ func RecoverGetUrisFromPage() {
 func GetUrisFromPage(uri string, w *http.ResponseWriter, remainingDepth int, maxDepth int, uriList *[]string, validDomainsRegex *string, alreadyChecked map[string]bool, extensions map[string]bool) {
 
 	if DEBUG == true {
+		fmt.Fprint((*w), "\nDEBUG---\tCurrent URI: ", uri)
 		fmt.Fprint((*w), "\nDEBUG---\tRemaining Depth: ", remainingDepth)
 		fmt.Fprint((*w), "\nDEBUG---\tMaximum Depth: ", maxDepth)
 	}
