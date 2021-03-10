@@ -230,7 +230,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	// Use REGEX to search HTML BODY for URIs, and append them to URIList
 	htmlStr := bytesToString(html)
-	urlRegexSyntax := `((http:\/\/)|(https:\/\/))?\S*(\.\w\w*)\S*[\w]`
+	urlRegexSyntax := `(https?:\/\/|\/)([\w\.]*)([a-z\.]{2,6})([\/\w \.\-\#]*)*\/?`
 	regex := regexp.MustCompile(urlRegexSyntax)
 	foundThisInvocation := regex.FindAllString(htmlStr, -1)
 	regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
