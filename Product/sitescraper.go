@@ -8,9 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
-
-	//"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -228,8 +225,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		j.Debug(w, 2, "URI: ", URI, " >  n: ", n, " > remaining depth: ", remainingDepth, " > foundURI: ", ShortenText(foundURI, 125))
 
 		// Is the foundURI a relative URI or an absolute URI? If it's a relative URI, we should append the stem
-
-		var parentURI, relativeURI *url.URL
+		/*var parentURI, relativeURI *url.URL
 		relativeURI, relativeURIError := relativeURI.Parse(foundURI)
 		j.Debug(w, 3, "relativeURI: ", ShortenText(relativeURI.String(), 125), "; error: ", relativeURIError)
 		j.Debug(w, 3, "scheme: ", relativeURI.Scheme)
@@ -240,7 +236,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 			//	foundURI = parentURI.ResolveReference(relativeURI).String()
 		} else {
 			j.Debug(w, 3, "link is absolute")
-		}
+		}*/
 
 		// Did we process this already?
 		if checkedURIs[foundURI] == true {
