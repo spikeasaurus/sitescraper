@@ -176,9 +176,6 @@ func RecoverGetURIsFromPage() {
 // URIList *[]string is a growing list of URIs
 func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth int, validDomainsRegex *string, checkedURIs map[string]bool, extensions map[string]bool) {
 
-	j.Debug(w, 1, "Current URI: ", URI)
-	j.Debug(w, 1, "Remaining Depth: ", remainingDepth)
-
 	defer RecoverGetURIsFromPage()
 
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
@@ -217,7 +214,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	for n, foundURI := range foundThisInvocation {
 
-		j.Debug(w, 2, "n=", n, ", remaining depth= ", remainingDepth, ", foundURI=", foundURI)
+		j.Debug(w, 2, "URI: ", URI, " > foundURI: ", ShortenText(foundURI, 125), " >  n: ", n, " > remaining depth: ", remainingDepth)
 
 		// Did we process this already?
 		if checkedURIs[foundURI] == true {
