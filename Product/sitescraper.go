@@ -220,7 +220,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 	j.Debug(w, 2, "Applying regex, domain name: ", foundThisInvocation)
 
 	// For each of the Urls we read, do the same thing (recurse), and dive deeper
-	j.Debug(w, 2, "htmlStr = ", bodyAsHTMLInString, ")")
+	j.Debug(w, 4, "htmlStr = ", bodyAsHTMLInString, ")")
 	j.Debug(w, 2, "Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 
 	for n, foundURI := range foundThisInvocation {
@@ -232,9 +232,15 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		var parentURI, relativeURI *url.URL
 		relativeURI, relativeURIError := relativeURI.Parse(foundURI)
 		j.Debug(w, 3, "relativeURI: ", ShortenText(relativeURI.String(), 125), "; error: ", relativeURIError)
-		parentURI, parentURIError := parentURI.Parse(URI)
-		j.Debug(w, 3, "parentURI: ", ShortenText(parentURI.String(), 125), "; error: ", parentURIError)
-		foundURI = parentURI.ResolveReference(relativeURI).String()
+		if relativeURI.Scheme == "" {
+			j.Debug(w, 3, "link is relative")
+			parentURI, parentURIError := parentURI.Parse(URI)
+			j.Debug(w, 3, "parentURI: ", ShortenText(parentURI.String(), 125), "; error: ", parentURIError)
+			foundURI = parentURI.ResolveReference(relativeURI).String()
+		} else {
+			j.Debug(w, 3, "link is absolute")
+			j.Debug(w, 3, "parentURI: ", ShortenText(parentURI.String(), 125), "; error: ", parentURIError)
+		}
 
 		// Did we process this already?
 		if checkedURIs[foundURI] == true {
