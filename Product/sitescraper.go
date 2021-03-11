@@ -181,6 +181,8 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	defer RecoverGetURIsFromPage()
 
+	j.Debug(w, 1, "URI: ", URI)
+
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
 	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	client := &http.Client{Transport: customTransport, Timeout: 0 * time.Second}
@@ -191,7 +193,10 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 	if errClientGet != nil {
 		j.Debug(w, 2, "HTTP Response Code is ", errClientGet, "when navigating to: ", URI)
 	}
-	bodyAsHTMLInBytes, _ := ioutil.ReadAll(resp.Body)
+	bodyAsHTMLInBytes, errIOUtilRead := ioutil.ReadAll(resp.Body)
+	if errIOUtilRead != nil {
+		j.Debug(w, 2, "IOUtil error is ", errIOUtilRead, "when navigating to: ", URI)
+	}
 
 	// Close
 	defer resp.Body.Close()
