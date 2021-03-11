@@ -101,15 +101,18 @@ func (j job) Debug(w *http.ResponseWriter, debugLevel int, str ...interface{}) {
 // MatchesExtension ...
 // TO DO: A better way to check for too short file names
 func (j job) MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) bool {
-	j.Debug(w, 1, "str = ", str)
-	j.Debug(w, 1, "ext = ", ext)
+	j.Debug(w, 1, "This URI = ", str)
+	j.Debug(w, 1, "Valid Extensions = ", ext)
 
 	// The shortest possible file name is something like A.jpg; anything shorter, and idk.
 	if len(str) < 6 {
+		j.Debug(w, 2, "Invalid extension (file length too short)")
 		return false
 	} else if ext[str[len(str)-3:]] == true || ext[str[len(str)-4:]] == true {
+		j.Debug(w, 2, "Valid extension")
 		return true
 	} else {
+		j.Debug(w, 2, "Invalid extension (other possibilities exhausted)")
 		return false
 	}
 }
@@ -118,7 +121,6 @@ func (j job) MatchesExtension(w *http.ResponseWriter, str string, ext map[string
 // Truncate a URI safety from whatever length to another shorter length
 func (j job) GetShortenedURI(str string, truncateLength int) string {
 	return ShortenText(str, truncateLength)
-	//	// j.Debug((*w), str[:Min(truncateLength, len(str[truncateLength]))], "\n")
 }
 
 // GetExtensions ...
@@ -259,6 +261,8 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 				// Switch hash table to indicate this URI has already been checked
 				alreadyChecked[foundURI] = true
+			} else {
+				j.Debug(w, 4, ShortenText(foundURI, 125), " -- recursion depth reached limit")
 			}
 		} else {
 			j.Debug(w, 3, "foundURI is not unique: ", ShortenText(foundURI, 125))
