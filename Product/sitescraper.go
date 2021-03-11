@@ -239,7 +239,6 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 			foundURI = parentURI.ResolveReference(relativeURI).String()
 		} else {
 			j.Debug(w, 3, "link is absolute")
-			j.Debug(w, 3, "parentURI: ", ShortenText(parentURI.String(), 125), "; error: ", parentURIError)
 		}
 
 		// Did we process this already?
