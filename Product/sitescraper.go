@@ -223,7 +223,9 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		// Is the foundURI a relative URI or an absolute URI? If it's a relative URI, we should append the stem
 		var parentURI, relativeURI url.URL
 		relativeURI.Parse(foundURI)
+		j.Debug(w, 3, "relativeURI: ", ShortenText(relativeURI.String(), 125))
 		parentURI.Parse(URI)
+		j.Debug(w, 3, "parentURI: ", ShortenText(parentURI.String(), 125))
 		foundURI = parentURI.ResolveReference(&relativeURI).String()
 
 		// Did we process this already?
