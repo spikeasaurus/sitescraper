@@ -26,7 +26,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&j); err != nil {
 		switch err {
 		case io.EOF:
-			// j.Debug(w, "EOF")
+			j.Debug(&w, 3, "EOF")
 			return
 		default:
 			log.Printf("json.NewDecoder: %v", err)
@@ -35,19 +35,15 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// List of URIs collected is a slice of strings
-	l := []string{}
-
 	// Map/hastable for tracking whether a URI has already been seen, to avoid visiting the same URI multiple times
-	alreadyChecked := *new(map[string]bool)
-	alreadyChecked = make(map[string]bool)
-	finalCleanup := *new(map[string]bool)
-	finalCleanup = make(map[string]bool)
+	checkedURIs := *new(map[string]bool)
+	checkedURIs = make(map[string]bool)
 
 	// Extensions in map format:
 	exts := *new(map[string]bool)
 	exts = make(map[string]bool)
 	// *exts = j.GetExtensions(&w) TO-DO: Add unmarshaller
+
 	exts["jpg"] = true
 	exts["jpeg"] = true
 	exts["png"] = true
@@ -60,34 +56,30 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	j.Debug(&w, 3, "png: ", exts["png"], "\n")
 
 	// Main recursion entry point
-	j.GetURIsFromPage(j.URI, &w, j.RecursionDepthInt(), j.RecursionDepthInt(), &l, &j.ValidDomainsRegex, alreadyChecked, exts)
+	j.GetURIsFromPage(j.URI, &w, j.RecursionDepthInt(), &j.ValidDomainsRegex, checkedURIs, exts)
 
-	j.Debug(&w, 1, "\nDEBUG\t---Generating list of downloadable files: ", len(l), " collected")
+	j.Debug(&w, 1, "Generating list of downloadable files: ", len(checkedURIs), " collected")
 
 	// out is the variable for keeping track of which of the URIs from l we actually want to keep
 	out := []string{}
 
-	for n, listItem := range l {
-		j.Debug(&w, 2, "Examining item ", fmt.Sprint(n), ": ", listItem)
+	for uri := range checkedURIs {
+		j.Debug(&w, 2, "Examining item ", uri)
 
-		if j.MatchesExtension(&w, listItem, exts) {
-			j.Debug(&w, 3, "Adding ", listItem, " to ", out)
-			out = append(out, listItem)
+		if j.MatchesExtension(&w, uri, exts) {
+			j.Debug(&w, 3, "Adding ", uri, " to ", out)
+			out = append(out, uri)
 		}
 	}
 
-	// Clean up duplicates
-	finalList := []string{}
-	j.RemoveDuplicates(&w, &out, &finalList, finalCleanup)
-	j.Debug(&w, 1, "URIs found:", len(finalList))
-
-	// Final output
-	///j.Debug(&w, 1, strings.Trim(fmt.Sprint(finalList), "[]"))
-	//j.Debug(&w, 0, finalList)
-	fmt.Fprint(w, finalList)
+	j.Debug(&w, 1, "URIs found:", len(out))
+	fmt.Fprint(w, out)
 }
 
 // Debug ...
+// This is how we print debug messages at different levels of detail.
+// debuglevel: level of detail
+// str ...interface{}: enter strings separated by commas
 func (j job) Debug(w *http.ResponseWriter, debugLevel int, str ...interface{}) {
 	debugLevelRequested, err := strconv.Atoi(j.DebugLevel)
 	if err != nil {
@@ -101,6 +93,7 @@ func (j job) Debug(w *http.ResponseWriter, debugLevel int, str ...interface{}) {
 // MatchesExtension ...
 // TO DO: A better way to check for too short file names
 func (j job) MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) bool {
+
 	j.Debug(w, 1, "This URI = ", str)
 	j.Debug(w, 1, "Valid Extensions = ", ext)
 
@@ -131,23 +124,6 @@ func (j job) GetExtensions(w *http.ResponseWriter) (extensions map[string]bool) 
 		j.Debug(w, 2, "ext = ", ext)
 	}
 	return extensions
-}
-
-// RemoveDuplicates ....
-func (j job) RemoveDuplicates(w *http.ResponseWriter, inStr *[]string, outStr *[]string, hash map[string]bool) {
-
-	j.Debug(w, 1, "inStr: ", len(*inStr))
-
-	for _, s := range *inStr {
-		if hash[s] != true {
-			j.Debug(w, 3, "Unique: ", s)
-			*outStr = append((*outStr), s)
-			hash[s] = true
-		} else {
-			j.Debug(w, 3, "Duplicate: ", s)
-		}
-	}
-
 }
 
 // ShortenText ...
@@ -198,16 +174,10 @@ func RecoverGetURIsFromPage() {
 
 // GetURIsFromPage ...
 // URIList *[]string is a growing list of URIs
-func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth int, maxDepth int, URIList *[]string, validDomainsRegex *string, alreadyChecked map[string]bool, extensions map[string]bool) {
+func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth int, validDomainsRegex *string, checkedURIs map[string]bool, extensions map[string]bool) {
 
 	j.Debug(w, 1, "Current URI: ", URI)
 	j.Debug(w, 1, "Remaining Depth: ", remainingDepth)
-	j.Debug(w, 1, "Maximum Depth: ", maxDepth)
-
-	//	if remainingDepth >= 0 {
-
-	// For element-n, issue GET to URI
-	//html, _ := func() ([]byte, error) {
 
 	defer RecoverGetURIsFromPage()
 
@@ -218,7 +188,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	resp, _ := client.Get(URI)
-	html, _ := ioutil.ReadAll(resp.Body)
+	bodyAsHTMLInBytes, _ := ioutil.ReadAll(resp.Body)
 
 	// Close
 	defer resp.Body.Close()
@@ -227,21 +197,22 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		//	j.Debug((*w), "\nERROR\t------", err)
 	}
 
-	//	return html, err
-	//}()
+	// Convert HTML of Body from []bytes to string
+	bodyAsHTMLInString := bytesToString(bodyAsHTMLInBytes)
 
 	// Use REGEX to search HTML BODY for URIs, and append them to URIList
-	htmlStr := bytesToString(html)
-	urlRegexSyntax := `(https?:\/\/|\/)([\w\.]*)([a-z\.]{2,6})([\/\w \.\-\#]*)*\/?`
-	regex := regexp.MustCompile(urlRegexSyntax)
-	foundThisInvocation := regex.FindAllString(htmlStr, -1)
-	regex2 := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
-	j.Debug(w, 2, "Applying regex, uri: ", foundThisInvocation)
-	foundThisInvocation = regex2.FindAllString(strings.Join(foundThisInvocation, " "), -1)
-	j.Debug(w, 2, "Applying regex, domain name: ", foundThisInvocation)
+	regexURIFilter := `(https?:\/\/|\/)([\w\.]*)([a-z\.]{2,6})([\/\w \.\-\#]*)*\/?`
+	URIFilter := regexp.MustCompile(regexURIFilter)
+	foundThisInvocation := URIFilter.FindAllString(bodyAsHTMLInString, -1)
+	j.Debug(w, 1, "Applying regex, uri: ", foundThisInvocation)
+
+	// Use REGEX a second time to filter by substrings that appear in the URI (this helps prevent searches from wandering off)
+	regexNameFilter := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
+	foundThisInvocation = regexNameFilter.FindAllString(strings.Join(foundThisInvocation, " "), -1)
+	j.Debug(w, 1, "Applying regex, domain name: ", foundThisInvocation)
 
 	// For each of the Urls we read, do the same thing (recurse), and dive deeper
-	j.Debug(w, 1, "htmlStr = ", htmlStr, ")")
+	j.Debug(w, 1, "htmlStr = ", bodyAsHTMLInString, ")")
 	j.Debug(w, 1, "Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 
 	for n, foundURI := range foundThisInvocation {
@@ -249,23 +220,24 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		j.Debug(w, 2, "n=", n, ", remaining depth= ", remainingDepth, ", foundURI=", foundURI)
 
 		// Did we process this already?
-		if alreadyChecked[foundURI] != true {
-			j.Debug(w, 3, "foundURI is unique: ", ShortenText(foundURI, 125))
-
-			*URIList = append(*URIList, foundURI)
-			j.Debug(w, 3, "URIList: ", *URIList)
+		if checkedURIs[foundURI] == true {
+			// Case: Duplicate URI
+			j.Debug(w, 3, "foundURI is a duplicate: ", ShortenText(foundURI, 125))
+		} else {
+			// Case: Novel URI
+			checkedURIs[foundURI] = true
+			j.Debug(w, 3, "foundURI is novel: ", ShortenText(foundURI, 125))
 
 			// Recurse deeper
 			if remainingDepth > 0 {
-				j.GetURIsFromPage(foundURI, w, remainingDepth-1, maxDepth, URIList, validDomainsRegex, alreadyChecked, extensions)
+				j.Debug(w, 4, ShortenText(foundURI, 125), " -- recursing deeper")
+				j.GetURIsFromPage(foundURI, w, remainingDepth-1, validDomainsRegex, checkedURIs, extensions)
 
 				// Switch hash table to indicate this URI has already been checked
 				//alreadyChecked[foundURI] = true
 			} else {
 				j.Debug(w, 4, ShortenText(foundURI, 125), " -- recursion depth reached limit")
 			}
-		} else {
-			j.Debug(w, 3, "foundURI is not unique: ", ShortenText(foundURI, 125))
 		}
 	}
 }
