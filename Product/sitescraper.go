@@ -26,7 +26,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&j); err != nil {
 		switch err {
 		case io.EOF:
-			j.Debug(&w, 3, "EOF")
+			j.Debug(&w, 1, "EOF")
 			return
 		default:
 			log.Printf("json.NewDecoder: %v", err)
@@ -48,12 +48,12 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	exts["jpeg"] = true
 	exts["png"] = true
 
-	j.Debug(&w, 2, "Testing Extensions")
-	j.Debug(&w, 3, "jpg: ", exts["jpg"])
-	j.Debug(&w, 3, "jpeg: ", exts["jpeg"])
-	j.Debug(&w, 3, "pdf: ", exts["pdf"])
-	j.Debug(&w, 3, "txt: ", exts["txt"])
-	j.Debug(&w, 3, "png: ", exts["png"], "\n")
+	j.Debug(&w, 1, "Testing Extensions")
+	j.Debug(&w, 1, "jpg: ", exts["jpg"])
+	j.Debug(&w, 1, "jpeg: ", exts["jpeg"])
+	j.Debug(&w, 1, "pdf: ", exts["pdf"])
+	j.Debug(&w, 1, "txt: ", exts["txt"])
+	j.Debug(&w, 1, "png: ", exts["png"], "\n")
 
 	// Main recursion entry point
 	j.GetURIsFromPage(j.URI, &w, j.RecursionDepthInt(), &j.ValidDomainsRegex, checkedURIs, exts)
@@ -64,7 +64,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	out := []string{}
 
 	for uri := range checkedURIs {
-		j.Debug(&w, 2, "Examining item ", uri)
+		j.Debug(&w, 1, "Examining item ", uri)
 
 		if j.MatchesExtension(&w, uri, exts) {
 			j.Debug(&w, 3, "Adding ", uri, " to ", out)
@@ -94,8 +94,8 @@ func (j job) Debug(w *http.ResponseWriter, debugLevel int, str ...interface{}) {
 // TO DO: A better way to check for too short file names
 func (j job) MatchesExtension(w *http.ResponseWriter, str string, ext map[string]bool) bool {
 
-	j.Debug(w, 1, "This URI = ", str)
-	j.Debug(w, 1, "Valid Extensions = ", ext)
+	j.Debug(w, 2, "This URI = ", str)
+	j.Debug(w, 2, "Valid Extensions = ", ext)
 
 	// The shortest possible file name is something like A.jpg; anything shorter, and idk.
 	if len(str) < 6 {
@@ -204,16 +204,16 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 	regexURIFilter := `(https?:\/\/|\/)([\w\.]*)([a-z\.]{2,6})([\/\w \.\-\#]*)*\/?`
 	URIFilter := regexp.MustCompile(regexURIFilter)
 	foundThisInvocation := URIFilter.FindAllString(bodyAsHTMLInString, -1)
-	j.Debug(w, 1, "Applying regex, uri: ", foundThisInvocation)
+	j.Debug(w, 2, "Applying regex, uri: ", foundThisInvocation)
 
 	// Use REGEX a second time to filter by substrings that appear in the URI (this helps prevent searches from wandering off)
 	regexNameFilter := regexp.MustCompile(`[^\s\"]*(` + (*validDomainsRegex) + `)[^\s\"]*`)
 	foundThisInvocation = regexNameFilter.FindAllString(strings.Join(foundThisInvocation, " "), -1)
-	j.Debug(w, 1, "Applying regex, domain name: ", foundThisInvocation)
+	j.Debug(w, 2, "Applying regex, domain name: ", foundThisInvocation)
 
 	// For each of the Urls we read, do the same thing (recurse), and dive deeper
-	j.Debug(w, 1, "htmlStr = ", bodyAsHTMLInString, ")")
-	j.Debug(w, 1, "Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
+	j.Debug(w, 2, "htmlStr = ", bodyAsHTMLInString, ")")
+	j.Debug(w, 2, "Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 
 	for n, foundURI := range foundThisInvocation {
 
