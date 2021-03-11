@@ -184,7 +184,10 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	resp, _ := client.Get(URI)
+	resp, errClientGet := client.Get(URI)
+	if errClientGet != nil {
+		j.Debug(w, 2, "HTTP Response Code is ", errClientGet, "when navigating to: ", URI)
+	}
 	bodyAsHTMLInBytes, _ := ioutil.ReadAll(resp.Body)
 
 	// Close
