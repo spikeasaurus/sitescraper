@@ -260,7 +260,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 				j.GetURIsFromPage(foundURI, w, remainingDepth-1, maxDepth, URIList, validDomainsRegex, alreadyChecked, extensions)
 
 				// Switch hash table to indicate this URI has already been checked
-				alreadyChecked[foundURI] = true
+				//alreadyChecked[foundURI] = true
 			} else {
 				j.Debug(w, 4, ShortenText(foundURI, 125), " -- recursion depth reached limit")
 			}
