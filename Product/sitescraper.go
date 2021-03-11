@@ -214,7 +214,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	for n, foundURI := range foundThisInvocation {
 
-		j.Debug(w, 2, "URI: ", URI, " > foundURI: ", ShortenText(foundURI, 125), " >  n: ", n, " > remaining depth: ", remainingDepth)
+		j.Debug(w, 2, "URI: ", URI, " >  n: ", n, " > remaining depth: ", remainingDepth, " > foundURI: ", ShortenText(foundURI, 125))
 
 		// Did we process this already?
 		if checkedURIs[foundURI] == true {
