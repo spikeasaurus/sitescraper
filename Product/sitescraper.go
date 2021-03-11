@@ -220,7 +220,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 	j.Debug(w, 2, "Applying regex, domain name: ", foundThisInvocation)
 
 	// For each of the Urls we read, do the same thing (recurse), and dive deeper
-	j.Debug(w, 4, "htmlStr = ", bodyAsHTMLInString, ")")
+	j.Debug(w, 5, "htmlStr = ", bodyAsHTMLInString, ")")
 	j.Debug(w, 2, "Iterating thru URIs found this innovaction (", len(foundThisInvocation), ")")
 
 	for n, foundURI := range foundThisInvocation {
@@ -237,7 +237,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 			j.Debug(w, 3, "link is relative")
 			parentURI, parentURIError := parentURI.Parse(URI)
 			j.Debug(w, 3, "parentURI: ", ShortenText(parentURI.String(), 125), "; error: ", parentURIError)
-			foundURI = parentURI.ResolveReference(relativeURI).String()
+			//	foundURI = parentURI.ResolveReference(relativeURI).String()
 		} else {
 			j.Debug(w, 3, "link is absolute")
 		}
@@ -253,13 +253,13 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 			// Recurse deeper
 			if remainingDepth > 0 {
-				j.Debug(w, 4, ShortenText(foundURI, 125), " -- recursing deeper")
+				j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursing deeper")
 				j.GetURIsFromPage(foundURI, w, remainingDepth-1, validDomainsRegex, checkedURIs, extensions)
 
 				// Switch hash table to indicate this URI has already been checked
 				//alreadyChecked[foundURI] = true
 			} else {
-				j.Debug(w, 4, ShortenText(foundURI, 125), " -- recursion depth reached limit")
+				j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursion depth reached limit")
 			}
 		}
 	}
