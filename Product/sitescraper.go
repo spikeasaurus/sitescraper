@@ -232,6 +232,7 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		var parentURI, relativeURI *url.URL
 		relativeURI, relativeURIError := relativeURI.Parse(foundURI)
 		j.Debug(w, 3, "relativeURI: ", ShortenText(relativeURI.String(), 125), "; error: ", relativeURIError)
+		j.Debug(w, 3, "scheme: ", relativeURI.Scheme)
 		if relativeURI.Scheme == "" {
 			j.Debug(w, 3, "link is relative")
 			parentURI, parentURIError := parentURI.Parse(URI)
