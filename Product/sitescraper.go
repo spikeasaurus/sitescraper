@@ -177,18 +177,17 @@ func RecoverGetURIsFromPage() {
 func RelativeToAbsoluteURI(parentURIString string, currentURI string) string {
 	var parentURIStruct *url.URL
 	parentURIStruct, _ = url.Parse(parentURIString)
+	relativeURI, err := url.Parse(currentURI)
+	if err != nil {
+		return ""
+	}
 
-	if parentURIStruct.Scheme != "" {
+	if relativeURI.Scheme != "" {
 		// It's not a relative URI; it's an absolute URI
 		return currentURI
-	} else {
-		relativeURI, err := url.Parse(currentURI)
-		if err != nil {
-			return ""
-		}
-		absoluteURI := parentURIStruct.ResolveReference(relativeURI)
-		return absoluteURI.String()
 	}
+	absoluteURI := parentURIStruct.ResolveReference(relativeURI)
+	return absoluteURI.String()
 }
 
 // GetURIsFromPage ...
