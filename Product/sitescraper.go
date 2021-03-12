@@ -74,8 +74,8 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 	}
 	//out = strings.Trim(out, "[]")
 
-	fmt.Fprint(w, out)
-	j.Debug(&w, 1, "URIs found:", len(out))
+	fmt.Fprint(w, "\n\n", out)
+	j.Debug(&w, 1, "\n\nURIs found:", len(out))
 }
 
 // Debug ...
