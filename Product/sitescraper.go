@@ -72,6 +72,7 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 			out = append(out, uri)
 		}
 	}
+	//out = strings.Trim(out, "[]")
 
 	fmt.Fprint(w, out)
 	j.Debug(&w, 1, "URIs found:", len(out))
@@ -246,24 +247,24 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		foundURI = RelativeToAbsoluteURI(URI, foundURI)
 
 		// Did we process this already?
-		if checkedURIs[foundURI] == true {
-			// Case: Duplicate URI
-			j.Debug(w, 3, "foundURI is a duplicate: ", ShortenText(foundURI, 125))
+		//	if checkedURIs[foundURI] == true {
+		// Case: Duplicate URI
+		j.Debug(w, 3, "foundURI is a duplicate: ", ShortenText(foundURI, 125))
+		//	} else {
+		// Case: Novel URI
+		checkedURIs[foundURI] = true
+		j.Debug(w, 3, "foundURI is novel: ", ShortenText(foundURI, 125))
+
+		// Recurse deeper
+		if remainingDepth > 0 {
+			j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursing deeper")
+			j.GetURIsFromPage(foundURI, w, remainingDepth-1, validDomainsRegex, checkedURIs, extensions)
+
+			// Switch hash table to indicate this URI has already been checked
+			//alreadyChecked[foundURI] = true
 		} else {
-			// Case: Novel URI
-			checkedURIs[foundURI] = true
-			j.Debug(w, 3, "foundURI is novel: ", ShortenText(foundURI, 125))
-
-			// Recurse deeper
-			if remainingDepth > 0 {
-				j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursing deeper")
-				j.GetURIsFromPage(foundURI, w, remainingDepth-1, validDomainsRegex, checkedURIs, extensions)
-
-				// Switch hash table to indicate this URI has already been checked
-				//alreadyChecked[foundURI] = true
-			} else {
-				j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursion depth reached limit")
-			}
+			j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursion depth reached limit")
 		}
+		//	}
 	}
 }
