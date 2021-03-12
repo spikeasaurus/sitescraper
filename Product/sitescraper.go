@@ -73,8 +73,8 @@ func Sitescraper(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	j.Debug(&w, 1, "URIs found:", len(out))
 	fmt.Fprint(w, out)
+	j.Debug(&w, 1, "URIs found:", len(out))
 }
 
 // Debug ...
