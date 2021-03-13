@@ -259,25 +259,25 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		foundURI = RelativeToAbsoluteURI(URI, foundURI)
 
 		// Did we process this already?
-		//	if checkedURIs[foundURI] == true {
-		// Case: Duplicate URI
-		j.Debug(w, 3, "foundURI is a duplicate: ", ShortenText(foundURI, 125))
-		//	} else {
-		// Case: Novel URI
-		checkedURIs[foundURI] = true
-		j.Debug(w, 3, "foundURI is novel: ", ShortenText(foundURI, 125))
-
-		// Recurse deeper
-		if remainingDepth > 0 {
-			j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursing deeper")
-			j.GetURIsFromPage(foundURI, w, remainingDepth-1, validDomainsRegex, checkedURIs, extensions)
-
-			// Switch hash table to indicate this URI has already been checked
-			//alreadyChecked[foundURI] = true
+		if checkedURIs[foundURI] == true {
+			// Case: Duplicate URI
+			j.Debug(w, 3, "foundURI is a duplicate: ", ShortenText(foundURI, 125))
 		} else {
-			j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursion depth reached limit")
+			// Case: Novel URI
+			checkedURIs[foundURI] = true
+			j.Debug(w, 3, "foundURI is novel: ", ShortenText(foundURI, 125))
+
+			// Recurse deeper
+			if remainingDepth > 0 {
+				j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursing deeper")
+				j.GetURIsFromPage(foundURI, w, remainingDepth-1, validDomainsRegex, checkedURIs, extensions)
+
+				// Switch hash table to indicate this URI has already been checked
+				//alreadyChecked[foundURI] = true
+			} else {
+				j.Debug(w, 3, ShortenText(foundURI, 125), " -- recursion depth reached limit")
+			}
 		}
-		//	}
 	}
 }
 
