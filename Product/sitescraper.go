@@ -251,6 +251,8 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	for n, foundURI := range foundThisInvocation {
 
+		time.Sleep(2 * time.Second)
+
 		j.Debug(w, 2, "URI: ", URI, " >  n: ", n, " > remaining depth: ", remainingDepth, " > foundURI: ", ShortenText(foundURI, 125))
 
 		// Is the foundURI a relative URI or an absolute URI? If it's a relative URI, we should append the stem
