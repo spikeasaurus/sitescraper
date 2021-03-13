@@ -156,6 +156,7 @@ type job struct {
 	MinimumFileSize   string `json:"minfilesize"`
 	ValidDomainsRegex string `json:"validdomains"`
 	DebugLevel        string `json:"debug"`
+	sleep             string `json:"sleep"`
 }
 
 // RecursionDepthInt ...
@@ -251,7 +252,10 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	for n, foundURI := range foundThisInvocation {
 
-		time.Sleep(2 * time.Second)
+		sleepTime, sleepTimeErr := strconv.Atoi(j.sleep)
+		if sleepTimeErr == nil {
+			time.Sleep(time.Duration(sleepTime))
+		}
 
 		j.Debug(w, 2, "URI: ", URI, " >  n: ", n, " > remaining depth: ", remainingDepth, " > foundURI: ", ShortenText(foundURI, 125))
 
