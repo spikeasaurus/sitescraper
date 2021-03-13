@@ -205,7 +205,17 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	resp, errClientGet := client.Get(URI)
+	var resp *http.Response
+	errClientGet := Retry(5, 2*time.Second, func() (errClientGet error) {
+		resp, errClientGet = client.Get(URI)
+		return
+	})
+	if errClientGet != nil {
+		j.Debug(w, 1, errClientGet)
+		http.Error(*w, errClientGet.Error(), 500)
+		return
+	}
+
 	if errClientGet != nil {
 		j.Debug(w, 2, "HTTP Response Code is ", errClientGet, "when navigating to: ", URI)
 	}
@@ -267,4 +277,22 @@ func (j job) GetURIsFromPage(URI string, w *http.ResponseWriter, remainingDepth 
 		}
 		//	}
 	}
+}
+
+func Retry(attempts int, sleep time.Duration, f func() error) (err error) {
+	for i := 0; ; i++ {
+		err = f()
+		if err == nil {
+			return
+		}
+
+		if i >= (attempts - 1) {
+			break
+		}
+
+		time.Sleep(sleep)
+
+		log.Println("retrying after error:", err)
+	}
+	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
 }
